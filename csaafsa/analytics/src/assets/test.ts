@@ -1,3 +1,6 @@
 export class Foo {
-    public name: string;
+    bar: string;
+    bur: number;
+    bor: boolean;
+
 }

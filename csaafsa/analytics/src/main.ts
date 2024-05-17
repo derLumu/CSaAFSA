@@ -1,8 +1,11 @@
-import * as fs from 'fs';
-import { parse } from '@typescript-eslint/typescript-estree';
+import {FileAstGenerator} from "./fileAstGenerator";
+import {filterDatatypeFromPath, walk} from "./directoryQuerier";
+import {DatatypeExtractor} from "./datatypeExtractor";
 
-const inputFile = "./analytics/src/assets/test.ts";
-const sourceCode = fs.readFileSync(inputFile, 'utf-8');
+const input = "./analytics/src/assets";
 
-const ast = parse(sourceCode);
-console.log(JSON.stringify(ast, null, 2));
+walk(input, (err, results) => {
+    const asts = FileAstGenerator.generateAsts(results)
+    const datatypes = asts.flatMap((ast) => DatatypeExtractor.extractDatatypes(ast))
+    console.log(datatypes)
+}, filterDatatypeFromPath)
