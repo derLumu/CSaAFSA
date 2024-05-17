@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import {FileAstGenerator} from "./fileAstGenerator";
+import {ContentChecker} from "./contentChecker";
 
 //@see https://gist.github.com/erikvullings/c7eed546a4be0ba43532f8b83048ef38
 
@@ -44,5 +44,5 @@ export const walk = (
 };
 
 export const filterDatatypeFromPath = (f: string) => {
-    return FileAstGenerator.isDatatypeFromPath(f);
+    return ContentChecker.isRelevantFromPath(f);
 };

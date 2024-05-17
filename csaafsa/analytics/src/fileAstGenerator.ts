@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import {AST, parse} from '@typescript-eslint/typescript-estree';
+import {ContentChecker} from "./contentChecker";
 
 export class FileAstGenerator {
 
@@ -10,17 +11,7 @@ export class FileAstGenerator {
     private static generateAst(filePath: string): AST<any> | undefined {
         const sourceCode = fs.readFileSync(filePath, 'utf-8');
         const ast = parse(sourceCode)
-        return (ast && this.isDatatypeFromContent(ast))? ast : undefined;
-    }
-
-    public static isDatatypeFromPath(path: string): boolean {
-        //TODO: Decide what types of files to accept as "relevant"
-        return path.endsWith('.ts');
-    }
-
-    private static isDatatypeFromContent(ast: AST<any>): boolean {
-        //TODO: Decide what types of files to accept as "relevant"
-        return true;
+        return (ast && ContentChecker.isRelevantFromContent(ast))? ast : undefined;
     }
 
 }
