@@ -4,7 +4,10 @@ export class ContentChecker {
 
     public static isDatatypeFromPath(path: string): boolean {
         //TODO: Decide what types of files to accept as "relevant"
-        return path.endsWith('.ts');
+        return !( // Use OR for possible execution shortcuts
+            !path.endsWith('.ts') ||
+            path.includes('service')
+        ) ;
     }
 
     public static isDatatypeFromContent(ast: AST<any>): boolean {
@@ -30,4 +33,10 @@ export class ContentChecker {
         return this.isDatatypeFromContent(ast) || this.isEndpointFromContent(ast);
     }
 
+    static isRelevantFromDirectory(dir: string) {
+        return !( // Use OR for possible execution shortcuts
+            //dir.includes('assets') ||
+            dir.includes('service')
+        ) ;
+    }
 }

@@ -7,7 +7,8 @@ import {ContentChecker} from "./contentChecker";
 export const walk = (
     dir: string,
     done: (err: Error | null, results?: string[]) => void,
-    filter?: (f: string) => boolean
+    filterFile?: (f: string) => boolean,
+    filterDirectory?: (f: string) => boolean
 ) => {
     let results: string[] = [];
     fs.readdir(dir, (err: Error | null, list: string[]) => {
@@ -15,7 +16,7 @@ export const walk = (
             return done(err);
         }
         let pending = list.length;
-        if (!pending) {
+        if (!pending || (filterDirectory && !filterDirectory(dir))) {
             return done(null, results);
         }
         list.forEach((file: string) => {
@@ -29,9 +30,9 @@ export const walk = (
                         if (!--pending) {
                             done(null, results);
                         }
-                    }, filter);
+                    }, filterFile, filterDirectory);
                 } else {
-                    if (typeof filter === 'undefined' || (filter && filter(file))) {
+                    if (typeof filterFile === 'undefined' || (filterFile && filterFile(file))) {
                         results.push(file);
                     }
                     if (!--pending) {
@@ -45,4 +46,8 @@ export const walk = (
 
 export const filterDatatypeFromPath = (f: string) => {
     return ContentChecker.isRelevantFromPath(f);
+};
+
+export const filterDirectoryFromPath = (f: string) => {
+    return ContentChecker.isRelevantFromDirectory(f);
 };
