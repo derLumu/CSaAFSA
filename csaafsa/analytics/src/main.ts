@@ -3,23 +3,26 @@ import {DatatypeExtractor} from "./extraction/datatypeExtractor";
 import {MainDatatypeAnalyser} from "./analyseDatatype/mainDatatypeAnalyser";
 
 import * as ts from 'typescript';
+import {EndpointExtractor} from "./extraction/endpointExtractor";
 
-//const input = "D:/Java/werwolf-bot/digital-control-center/backend/src/objects";
-const input = "./analytics/src/assets";
+const input = "D:/Java/werwolf-bot/digital-control-center/backend/src/objects";
+//const input = "./analytics/src/assets";
 const mode = 'deep'
 
 walk(input, (err, projectFiles) => {
     const program = ts.createProgram(projectFiles, {});
     const checker = program.getTypeChecker()
 
-    //console.log(program.getSourceFile("D:/Java/werwolf-bot/digital-control-center/backend/src/objects/objects.controller.ts"))
+    /*
 
     // handle datatypes
     const datatypes = DatatypeExtractor.extractDatatypes(program, checker, projectFiles)
     const mainDatatypeAnalyser = new MainDatatypeAnalyser()
     mainDatatypeAnalyser.analyseDatatypes(datatypes, mode)
 
+    */
+
     // handle endpoints
-    //TODO
+    const endpoints = EndpointExtractor.extractEndpoints(program, checker, projectFiles)
 
 }, filterDatatypeFromPath, filterDirectoryFromPath)
