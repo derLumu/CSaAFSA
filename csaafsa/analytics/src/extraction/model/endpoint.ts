@@ -1,4 +1,11 @@
+import ts from "typescript";
+
 export class Endpoint {
     name: string;
-    path: string;
+    type: "Get" | "Post" | "Patch" | "Delete";
+    url: string;
+    decoratorNames: string[];
+    statements:  ts.Statement[];
+
+    filePath: string;
 }

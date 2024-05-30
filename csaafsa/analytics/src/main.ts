@@ -13,16 +13,11 @@ walk(input, (err, projectFiles) => {
     const program = ts.createProgram(projectFiles, {});
     const checker = program.getTypeChecker()
 
-    /*
-
     // handle datatypes
     const datatypes = DatatypeExtractor.extractDatatypes(program, checker, projectFiles)
     const mainDatatypeAnalyser = new MainDatatypeAnalyser()
     mainDatatypeAnalyser.analyseDatatypes(datatypes, mode)
 
-    */
-
     // handle endpoints
     const endpoints = EndpointExtractor.extractEndpoints(program, checker, projectFiles)
-
 }, filterDatatypeFromPath, filterDirectoryFromPath)
