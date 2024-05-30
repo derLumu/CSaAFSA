@@ -1,21 +1,24 @@
-@testDecoratorClass
 export class Foo {
-    bar: string;
-    bur: number;
-    @testDecoratorProperty
-    bor: boolean;
-    bir: Date;
+    static fooMethode() {
+        return 'foo';
+    }
 }
 
-@testDecoratorClass
-export class Foo2 {
-    bar: string;
-    bur: number;
-    @testDecoratorProperty
-    bor: boolean;
-    bir: Date;
+@BaseDecorator
+export class AttributeOnlyClass {
+    private privateName: string;
+    age: number;
+    dayOfBirth: Date;
+    @format()
+    decoratorAttribute: string;
+    classAttribute: Foo;
 }
 
-function testDecoratorClass(constructor: Function) { }
+export function format() {
+    return function ( target: any, propertyKey: string) {
+    }
+}
 
-function testDecoratorProperty(parent: Foo, constructor: string) { }
+function BaseDecorator(ctr: Function) {
+
+}

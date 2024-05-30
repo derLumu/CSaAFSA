@@ -1,12 +1,21 @@
-@testDecoratorClass
-export class Foo {
-    bar: string;
-    bur: number;
-    @testDecoratorProperty
-    bor: boolean;
-    bir: Date;
+import {Foo, format} from "./test";
+
+export class Sample {
+    public static main() {
+        Bar.barMethode()
+    }
 }
 
-function testDecoratorClass(constructor: Function) { }
+export class Bar {
+    static barMethode() {
+        return 'bar';
+    }
+}
 
-function testDecoratorProperty(parent: Foo, constructor: string) { }
+export class AttributeOnlyClass {
+    privateName: string;
+    age: number;
+    dayOfBirth: Date;
+    decoratorAttribute: number;
+    classAttribute: Foo;
+}

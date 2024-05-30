@@ -1,8 +1,8 @@
-import {Decorator} from "@swc/core";
+import * as ts from "typescript";
 
 export class Datatype {
     public name: string;
-    public decorators: Decorator[]; //captures decorators on the class, not the key
+    public decorators: ts.Decorator[];
     public properties: DatatypeProperty[];
 
     public path: string;
@@ -10,6 +10,6 @@ export class Datatype {
 
 export class DatatypeProperty {
     public name: string;
-    public type: string;
-    public decorators: Decorator[]; //captures decorators on the property, not the key
+    public typeId: number;
+    public decorators: ts.Decorator[];
 }
