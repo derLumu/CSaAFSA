@@ -1,26 +1,17 @@
 import {Datatype, DatatypeProperty} from "./model/datatype";
 import ts from "typescript";
+import {Extractor} from "./extractor";
 
-export class DatatypeExtractor {
+export class DatatypeExtractor extends Extractor {
 
     public static extractDatatypes(program: ts.Program, checker: ts.TypeChecker, projectFiles: string[]): Datatype[] {
-        // get relevant source files from project files and extract datatypes for each file
-        const sourceFiles = projectFiles.map((file) => program.getSourceFile(file));
-        return sourceFiles.flatMap((sourceFile) => this.extractDatatypeFromSourceFile(sourceFile, checker)).filter((type) => type !== undefined) as Datatype[];
-    }
-
-    private static extractDatatypeFromSourceFile(sourceFile: ts.SourceFile, checker: ts.TypeChecker): Datatype[] | undefined {
-        if (sourceFile.getChildCount() == 0) { return undefined; }
-        // get syntax list of the source file
-        const syntaxList = sourceFile.getChildAt(0);
-        if (syntaxList.kind !== ts.SyntaxKind.SyntaxList) { return undefined; }
-        // access the declarations and filter for class declarations
-        const classDeclarations: ts.ClassDeclaration[] = syntaxList.getChildren().filter((child) => child.kind === ts.SyntaxKind.ClassDeclaration) as ts.ClassDeclaration[];
+        const sourceFiles = this.fileNamesToSourceFiles(program, projectFiles);
+        const classDeclarations = sourceFiles.flatMap((sourceFile) => this.classDeclarationsFromSourceFile(sourceFile)).filter((type) => type !== undefined) as ts.ClassDeclaration[];
         // extract datatype from classes
-        return classDeclarations.map((declaration) => this.extractDatatypeFromClass(declaration as ts.ClassDeclaration, checker, sourceFile.fileName)).filter((type) => type !== undefined) as Datatype[];
+        return classDeclarations.map((declaration) => this.extractDatatypeFromClass(declaration as ts.ClassDeclaration, checker)).filter((type) => type !== undefined) as Datatype[];
     }
 
-    private static extractDatatypeFromClass(classDeclaration: ts.ClassDeclaration, checker: ts.TypeChecker, fileName: string): Datatype | undefined {
+    private static extractDatatypeFromClass(classDeclaration: ts.ClassDeclaration, checker: ts.TypeChecker): Datatype | undefined {
         // ignore classes with other declarations than properties. They do not represent datatypes, thus are not relevant here
         if (classDeclaration.members.find((member) => member.kind !== ts.SyntaxKind.PropertyDeclaration)) { return undefined; }
 
@@ -32,7 +23,7 @@ export class DatatypeExtractor {
             name: classDeclaration.name.escapedText,
             decorators: decorators,
             properties: properties,
-            path: fileName
+            path: classDeclaration.getSourceFile().fileName
         } as Datatype;
     }
 

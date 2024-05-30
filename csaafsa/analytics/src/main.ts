@@ -4,12 +4,15 @@ import {MainDatatypeAnalyser} from "./analyseDatatype/mainDatatypeAnalyser";
 
 import * as ts from 'typescript';
 
+//const input = "D:/Java/werwolf-bot/digital-control-center/backend/src/objects";
 const input = "./analytics/src/assets";
 const mode = 'deep'
 
 walk(input, (err, projectFiles) => {
     const program = ts.createProgram(projectFiles, {});
     const checker = program.getTypeChecker()
+
+    //console.log(program.getSourceFile("D:/Java/werwolf-bot/digital-control-center/backend/src/objects/objects.controller.ts"))
 
     // handle datatypes
     const datatypes = DatatypeExtractor.extractDatatypes(program, checker, projectFiles)
@@ -18,4 +21,5 @@ walk(input, (err, projectFiles) => {
 
     // handle endpoints
     //TODO
+
 }, filterDatatypeFromPath, filterDirectoryFromPath)
