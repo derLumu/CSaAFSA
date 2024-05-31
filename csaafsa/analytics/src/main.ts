@@ -20,7 +20,7 @@ walk(input, (err, projectFiles) => {
     mainDatatypeAnalyser.analyseDatatypes(datatypes, mode)
 
     // handle endpoints
-    const endpoints = EndpointExtractor.extractEndpoints(program, checker, projectFiles)
+    const endpoints = EndpointExtractor.extractEndpoints(program, projectFiles)
     const mainEndpointAnalyser = new MainEndpointAnalyser()
     mainEndpointAnalyser.analyseEndpoints(endpoints, mode)
 }, filterDatatypeFromPath, filterDirectoryFromPath)

@@ -1,4 +1,4 @@
-import {Foo, format} from "./test";
+import {Foo} from "./test";
 
 export class Sample {
     public static main() {
