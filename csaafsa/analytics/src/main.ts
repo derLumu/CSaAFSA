@@ -4,6 +4,7 @@ import {MainDatatypeAnalyser} from "./analyseDatatype/mainDatatypeAnalyser";
 
 import * as ts from 'typescript';
 import {EndpointExtractor} from "./extraction/endpointExtractor";
+import {MainEndpointAnalyser} from "./analyseEndpoint/mainEndpointAnalyser";
 
 const input = "D:/Java/werwolf-bot/digital-control-center/backend/src/objects";
 //const input = "./analytics/src/assets";
@@ -20,4 +21,6 @@ walk(input, (err, projectFiles) => {
 
     // handle endpoints
     const endpoints = EndpointExtractor.extractEndpoints(program, checker, projectFiles)
+    const mainEndpointAnalyser = new MainEndpointAnalyser()
+    mainEndpointAnalyser.analyseEndpoints(endpoints, mode)
 }, filterDatatypeFromPath, filterDirectoryFromPath)
