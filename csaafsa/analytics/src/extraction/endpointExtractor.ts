@@ -36,7 +36,7 @@ export class EndpointExtractor extends Extractor {
         return {
             name: methodDeclaration.name.getText(),
             type: type as "Get" | "Post" | "Patch" | "Delete",
-            url: urlPrefix + methodDeclaration.name.getText(),
+            url: urlPrefix.replace(/'/g, "") + "/" + methodDeclaration.name.getText(),
             handledExceptions: decoratorNames,
             methodObject: methodDeclaration,
             filePath: methodDeclaration.getSourceFile().fileName

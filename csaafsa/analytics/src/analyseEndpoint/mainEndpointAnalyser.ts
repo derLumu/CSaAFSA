@@ -14,13 +14,13 @@ export class MainEndpointAnalyser {
     sumOfEndpointsUniqueUrl: number = 0;
     exceptionAnalysis: ExceptionAnalysis = { exceptionsThrown: 0, exceptionsUnhandled: 0 }
 
-    public analyseEndpoints(endpoints: Endpoint[], checker: ts.TypeChecker, mode: 'fast' | 'deep'): void {
+    public analyseEndpoints(endpoints: Endpoint[], checker: ts.TypeChecker, projectFiles: string[], mode: 'fast' | 'deep'): void {
         // start analysis
         this.sumOfEndpoints = endpoints.length
         this.checkEndpointsUniqueNameAndUrl(endpoints)
         this.sumOfEndpointsUniqueName = this.getSumOfEndpointsUniqueName(endpoints)
         this.sumOfEndpointsUniqueUrl = this.getSumOfEndpointsUniqueUrl(endpoints)
-        this.exceptionAnalysis = this.analyseExceptionHandling(endpoints, checker)
+        this.exceptionAnalysis = this.analyseExceptionHandling(endpoints, checker, projectFiles)
 
         this.outputResults()
     }
@@ -47,8 +47,8 @@ export class MainEndpointAnalyser {
         return new Set(endpoints.map((endpoint) => endpoint.type + "," + endpoint.url)).size;
     }
 
-    private analyseExceptionHandling(endpoints: Endpoint[], checker: ts.TypeChecker): ExceptionAnalysis {
-        const exceptionAnalysis = endpoints.map((endpoint) => new ExceptionEndpointAnalyser(checker).analyseEndpoint(endpoint))
+    private analyseExceptionHandling(endpoints: Endpoint[], checker: ts.TypeChecker, projectFiles: string[]): ExceptionAnalysis {
+        const exceptionAnalysis = endpoints.map((endpoint) => new ExceptionEndpointAnalyser(checker, projectFiles).analyseEndpoint(endpoint))
         return {
             exceptionsThrown: exceptionAnalysis.map((a) => a.exceptionsThrown).reduce((sum, current) => sum + current, 0),
             exceptionsUnhandled: exceptionAnalysis.map((a) => a.exceptionsUnhandled).reduce((sum, current) => sum + current, 0)
@@ -57,6 +57,16 @@ export class MainEndpointAnalyser {
     }
 
     private outputResults() {
-
+        console.log(`----------------------------------------------------------------------------\n`
+            + `Evaluation of Endpoints:\n`
+            + `Sum of Endpoints: ${this.sumOfEndpoints}\n`
+            + `Sum of Unique Endpoints (Name): ${this.sumOfEndpointsUniqueName}\n`
+            + `Boilerplate Score (Name): ${this.sumOfEndpointsUniqueName / this.sumOfEndpoints * 100}%\n`
+            + `Sum of Unique Endpoints (URL): ${this.sumOfEndpointsUniqueUrl}\n`
+            + `Boilerplate Score (Content): ${this.sumOfEndpointsUniqueUrl / this.sumOfEndpoints * 100}%\n`
+            + `Sum Exceptions thrown: ${this.exceptionAnalysis.exceptionsThrown}\n`
+            + `Sum Exceptions handled: ${this.exceptionAnalysis.exceptionsThrown - this.exceptionAnalysis.exceptionsUnhandled}\n`
+            + `Handling Score (Exceptions): ${(this.exceptionAnalysis.exceptionsThrown - this.exceptionAnalysis.exceptionsUnhandled) / this.exceptionAnalysis.exceptionsThrown * 100}%\n`
+            + `----------------------------------------------------------------------------\n`)
     }
 }
