@@ -1,14 +1,24 @@
 import {Foo} from "./test";
 
 export class Sample {
-    public static main() {
+    main() {
         Bar.barMethode()
     }
 }
 
 export class Bar {
-    static barMethode() {
-        return 'bar';
+    static async barMethode() {
+        this.ExceptionMethode()
+        const f = this.ExceptionMethode();
+        this.ExceptionMethode().split(",")
+        const s = new Sample()
+        s.main;
+        await s.main;
+        return this.ExceptionMethode();
+    }
+
+    static ExceptionMethode(): string {
+        return "test,test"
     }
 }
 

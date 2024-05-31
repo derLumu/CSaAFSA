@@ -1,5 +1,6 @@
 import {Endpoint} from "../extraction/model/endpoint";
 import {ExceptionEndpointAnalyser} from "./exceptionEndpointAnalyser";
+import ts from "typescript";
 
 export class ExceptionAnalysis {
     exceptionsThrown: number = 0;
@@ -13,13 +14,13 @@ export class MainEndpointAnalyser {
     sumOfEndpointsUniqueUrl: number = 0;
     exceptionAnalysis: ExceptionAnalysis = { exceptionsThrown: 0, exceptionsUnhandled: 0 }
 
-    public analyseEndpoints(endpoints: Endpoint[], mode: 'fast' | 'deep'): void {
+    public analyseEndpoints(endpoints: Endpoint[], checker: ts.TypeChecker, mode: 'fast' | 'deep'): void {
         // start analysis
         this.sumOfEndpoints = endpoints.length
         this.checkEndpointsUniqueNameAndUrl(endpoints)
         this.sumOfEndpointsUniqueName = this.getSumOfEndpointsUniqueName(endpoints)
         this.sumOfEndpointsUniqueUrl = this.getSumOfEndpointsUniqueUrl(endpoints)
-        this.exceptionAnalysis = this.analyseExceptionHandling(endpoints)
+        this.exceptionAnalysis = this.analyseExceptionHandling(endpoints, checker)
 
         this.outputResults()
     }
@@ -46,8 +47,8 @@ export class MainEndpointAnalyser {
         return new Set(endpoints.map((endpoint) => endpoint.type + "," + endpoint.url)).size;
     }
 
-    private analyseExceptionHandling(endpoints: Endpoint[]): ExceptionAnalysis {
-        const exceptionAnalysis = endpoints.map((endpoint) => ExceptionEndpointAnalyser.analyseEndpoint(endpoint))
+    private analyseExceptionHandling(endpoints: Endpoint[], checker: ts.TypeChecker): ExceptionAnalysis {
+        const exceptionAnalysis = endpoints.map((endpoint) => new ExceptionEndpointAnalyser(checker).analyseEndpoint(endpoint))
         return {
             exceptionsThrown: exceptionAnalysis.map((a) => a.exceptionsThrown).reduce((sum, current) => sum + current, 0),
             exceptionsUnhandled: exceptionAnalysis.map((a) => a.exceptionsUnhandled).reduce((sum, current) => sum + current, 0)

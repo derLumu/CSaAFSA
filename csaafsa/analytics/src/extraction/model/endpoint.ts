@@ -4,8 +4,8 @@ export class Endpoint {
     name: string;
     type: "Get" | "Post" | "Patch" | "Delete";
     url: string;
-    decoratorNames: string[];
-    statements:  ts.Statement[];
+    handledExceptions: string[];
+    methodObject:  ts.MethodDeclaration;
 
     filePath: string;
 }

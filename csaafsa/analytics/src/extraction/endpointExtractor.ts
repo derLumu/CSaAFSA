@@ -31,14 +31,14 @@ export class EndpointExtractor extends Extractor {
         const type = identifier.map((id) => id.escapedText).find((s) => s === "Get" || s === "Post" || s === "Patch" || s === "Delete")
         if (!type) { return undefined; }
         // safe all other decorators
-        const decoratorNames = identifier.map((id) => id.getText()).filter((s) => s !== "Get" && s !== "Post" && s !== "Patch" && s !== "Delete")
+        const decoratorNames = identifier.map((id) => id.getText()).filter((s) => s !== "Get" && s !== "Post" && s !== "Patch" && s !== "Delete" && s.endsWith("Response") && s.startsWith("Api")).map((s) => s.substring(3, s.length - 8))
 
         return {
             name: methodDeclaration.name.getText(),
             type: type as "Get" | "Post" | "Patch" | "Delete",
             url: urlPrefix + methodDeclaration.name.getText(),
-            decoratorNames: decoratorNames,
-            statements: [...methodDeclaration.body.statements],
+            handledExceptions: decoratorNames,
+            methodObject: methodDeclaration,
             filePath: methodDeclaration.getSourceFile().fileName
         }
     }
