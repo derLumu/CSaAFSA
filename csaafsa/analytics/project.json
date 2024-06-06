@@ -14,7 +14,7 @@
         "outputPath": "dist/analytics",
         "format": ["cjs"],
         "bundle": false,
-        "main": "analytics/src/main.ts",
+        "main": "analytics/src/index.ts",
         "tsConfig": "analytics/tsconfig.app.json",
         "assets": ["analytics/src/assets"],
         "generatePackageJson": true,
