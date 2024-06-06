@@ -53,15 +53,15 @@ export const filterDirectoryFromPath = (f: string) => {
 };
 
 export function walkSync(dir): string [] {
-    const returnArray = []
+    let returnArray = []
     const files = fs.readdirSync(dir);
 
     for (const file of files) {
         const pathToFile = path.join(dir, file);
         const isDirectory = fs.statSync(pathToFile).isDirectory();
         if (isDirectory && filterDirectoryFromPath(pathToFile)) {
-            returnArray.concat(...walkSync(pathToFile));
-        } else {
+            returnArray = returnArray.concat(walkSync(pathToFile));
+        } else if (filterDatatypeFromPath(pathToFile)) {
             returnArray.push(pathToFile);
         }
     }

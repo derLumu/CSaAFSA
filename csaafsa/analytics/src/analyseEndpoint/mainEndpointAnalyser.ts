@@ -5,6 +5,7 @@ import ts from "typescript";
 export class ExceptionAnalysis {
     exceptionsThrown: number = 0;
     exceptionsUnhandled: number = 0;
+    diagnostics: ts.Diagnostic[] = []
 }
 
 export class MainEndpointAnalyser {
@@ -12,7 +13,9 @@ export class MainEndpointAnalyser {
     sumOfEndpoints: number = 0;
     sumOfEndpointsUniqueName: number = 0;
     sumOfEndpointsUniqueUrl: number = 0;
-    exceptionAnalysis: ExceptionAnalysis = { exceptionsThrown: 0, exceptionsUnhandled: 0 }
+    exceptionAnalysis: ExceptionAnalysis = { exceptionsThrown: 0, exceptionsUnhandled: 0, diagnostics: []}
+
+    diagnostics: ts.Diagnostic[] = []
 
     public analyseEndpoints(endpoints: Endpoint[], checker: ts.TypeChecker, projectFiles: string[], mode: 'fast' | 'deep'): ts.Diagnostic[] {
         // start analysis
@@ -23,7 +26,7 @@ export class MainEndpointAnalyser {
         this.exceptionAnalysis = this.analyseExceptionHandling(endpoints, checker, projectFiles)
 
         this.outputResults()
-        return []
+        return [...this.diagnostics, ...this.exceptionAnalysis.diagnostics]
     }
 
     private checkEndpointsUniqueNameAndUrl(endpoints: Endpoint[]) {
@@ -31,10 +34,28 @@ export class MainEndpointAnalyser {
             for (let j = i + 1; j < endpoints.length; j++) {
                 // for all pair of datatypes check if the name and url are unique
                 if (endpoints[i].name === endpoints[j].name) {
-                    console.warn(`Endpoint with name "${endpoints[i].name}" is not unique! Name found in:\n- ${endpoints[i].filePath}\n- ${endpoints[j].filePath}\n`)
+                    const t = endpoints[i]
+                    this.diagnostics.push({
+                        file: t.methodObject.getSourceFile(),
+                        start: t.methodObject.name.getStart(),
+                        length: t.methodObject.name.getEnd() - t.methodObject.name.getStart(),
+                        messageText: `Endpoint name "${t.name}" is not unique!`,
+                        category: ts.DiagnosticCategory.Warning,
+                        code: 778,
+                        source: 'EndpointAnalyser'
+                    })
                 }
                 if (endpoints[i].type + "," + endpoints[i].url === endpoints[j].type + "," + endpoints[j].url) {
-                    console.warn(`Endpoint with url "${endpoints[i].name}" is not unique! Name found in:\n- ${endpoints[i].filePath}\n- ${endpoints[j].filePath}\n`)
+                    const t = endpoints[i]
+                    this.diagnostics.push({
+                        file: t.methodObject.getSourceFile(),
+                        start: t.methodObject.name.getStart(),
+                        length: t.methodObject.name.getEnd() - t.methodObject.name.getStart(),
+                        messageText: `Endpoint url "${t.url}" is not unique! Found in:\n- ${t.filePath}\n- ${endpoints[j].filePath}`,
+                        category: ts.DiagnosticCategory.Warning,
+                        code: 778,
+                        source: 'EndpointAnalyser'
+                    })
                 }
             }
         }
@@ -52,7 +73,8 @@ export class MainEndpointAnalyser {
         const exceptionAnalysis = endpoints.map((endpoint) => new ExceptionEndpointAnalyser(checker, projectFiles).analyseEndpoint(endpoint))
         return {
             exceptionsThrown: exceptionAnalysis.map((a) => a.exceptionsThrown).reduce((sum, current) => sum + current, 0),
-            exceptionsUnhandled: exceptionAnalysis.map((a) => a.exceptionsUnhandled).reduce((sum, current) => sum + current, 0)
+            exceptionsUnhandled: exceptionAnalysis.map((a) => a.exceptionsUnhandled).reduce((sum, current) => sum + current, 0),
+            diagnostics: exceptionAnalysis.map((a) => a.diagnostics).reduce((sum, current) => sum.concat(current), [])
         }
 
     }

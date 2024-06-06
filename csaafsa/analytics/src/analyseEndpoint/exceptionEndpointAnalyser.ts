@@ -1,4 +1,4 @@
-import {Endpoint} from "../extraction/model/endpoint";
+import {Endpoint, FoundExpection} from "../extraction/model/endpoint";
 import {ExceptionAnalysis} from "./mainEndpointAnalyser";
 import ts from "typescript";
 import fs from "fs";
@@ -14,7 +14,10 @@ export class ExceptionEndpointAnalyser {
     mappedExceptions: { "stringMatch": string, "ExceptionToHandle": string }[]  = []
 
     seenMethods: Set<number> = new Set()
-    seenExceptions: Set<string> = new Set()
+    seenExceptionsString: Set<string> = new Set()
+    seenExceptions: Set<FoundExpection> = new Set()
+
+    diagnostics: ts.Diagnostic[] = []
 
     constructor(checker: ts.TypeChecker, projectFiles: string[]) {
         this.checker = checker;
@@ -26,16 +29,24 @@ export class ExceptionEndpointAnalyser {
         this.recursiveMethodOrConstructor(endpoint.methodObject)
         let unhandledCounter = 0;
         this.seenExceptions.forEach((exception) => {
-            if (!endpoint.handledExceptions.find(e => exception.includes(e))) {
+            if (!endpoint.handledExceptions.find(e => exception.name.includes(e))) {
                 unhandledCounter++;
                 //TODO: remind the throw object or file path of it to display it here
-                console.warn(`Exception "${exception}" in endpoint "${endpoint.name}" with url "(${endpoint.type}) ${endpoint.url}" is not handled! \n - Found in File: ${endpoint.methodObject.getSourceFile().fileName}`)
+                this.diagnostics.push({
+                    file: exception.throwNode.getSourceFile(),
+                    start: exception.throwNode.getStart(),
+                    length: exception.throwNode.getEnd() - exception.throwNode.getStart(),
+                    messageText: `Exception "${exception.name}" is not handled in endpoint "${endpoint.name}"!`,
+                    category: ts.DiagnosticCategory.Warning,
+                    code: 779,
+                    source: 'EndpointAnalyser'
+                })
             }
         })
-        console.log(this.seenExceptions)
         return {
-            exceptionsThrown: this.seenExceptions.size,
-            exceptionsUnhandled: unhandledCounter
+            exceptionsThrown: this.seenExceptionsString.size,
+            exceptionsUnhandled: unhandledCounter,
+            diagnostics: this.diagnostics
         }
     }
 
@@ -54,14 +65,30 @@ export class ExceptionEndpointAnalyser {
         // check if the node is a throw statement -> get the exception
         if (node.kind === ts.SyntaxKind.ThrowStatement) {
             const exception = (node as ts.ThrowStatement).expression as ts.NewExpression
-            if (exception.kind === ts.SyntaxKind.NewExpression) { this.seenExceptions.add(exception.expression.getText()) }
-            else if (exception.kind === ts.SyntaxKind.Identifier) { this.seenExceptions.add(this.checker.getSymbolAtLocation(exception).getName()) }
+            if (exception.kind === ts.SyntaxKind.NewExpression) {
+                !this.seenExceptionsString.has(exception.expression.getText()) && this.seenExceptions.add({
+                    name: exception.expression.getText(),
+                    throwNode: node as ts.ThrowStatement
+                }) && this.seenExceptionsString.add(exception.expression.getText())
+            }
+            else if (exception.kind === ts.SyntaxKind.Identifier) {
+                const symbol = this.checker.getSymbolAtLocation(exception)
+                !this.seenExceptionsString.has(symbol.getName()) && this.seenExceptions.add({
+                    name: symbol.getName(),
+                    throwNode: node as ts.ThrowStatement
+                }) && this.seenExceptionsString.add(symbol.getName())
+            }
             return;
         }
 
         if (node.kind == ts.SyntaxKind.Identifier) {
             const match = this.mappedExceptions.find((exception) => node.getText().toLowerCase().includes(exception.stringMatch.toLowerCase()))
-            if (match) { this.seenExceptions.add(match.ExceptionToHandle) }
+            if (match) {
+                !this.seenExceptionsString.has(node.getText()) && this.seenExceptions.add({
+                    name: match.ExceptionToHandle,
+                    throwNode: node
+                }) && this.seenExceptionsString.add(node.getText())
+            }
         }
 
         // check if the node is a call -> get the symbol -> search the extracted constructor or method

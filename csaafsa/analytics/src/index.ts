@@ -16,16 +16,17 @@ function main(input: string, program: ts.Program = undefined): ts.Diagnostic[] {
     // handle datatypes
     const datatypes = DatatypeExtractor.extractDatatypes(program, checker, projectFiles)
     const mainDatatypeAnalyser = new MainDatatypeAnalyser()
-    const diagnostics: ts.Diagnostic[] = mainDatatypeAnalyser.analyseDatatypes(datatypes, "deep")
+    let diagnostics: ts.Diagnostic[] = mainDatatypeAnalyser.analyseDatatypes(datatypes, "deep")
 
     // handle endpoints
     const endpoints = EndpointExtractor.extractEndpoints(program, projectFiles)
     const mainEndpointAnalyser = new MainEndpointAnalyser()
-    diagnostics.concat(...mainEndpointAnalyser.analyseEndpoints(endpoints, checker, projectFiles, "deep"))
+    diagnostics = diagnostics.concat(...mainEndpointAnalyser.analyseEndpoints(endpoints, checker, projectFiles, "deep"))
 
     return diagnostics
 }
-main(input);
+
+console.log(main(input).map(d => d.messageText));
 
 function init(modules: { typescript: typeof import("typescript/lib/tsserverlibrary") }) {
     const ts = modules.typescript;

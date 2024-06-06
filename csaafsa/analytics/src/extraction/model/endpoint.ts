@@ -9,3 +9,8 @@ export class Endpoint {
 
     filePath: string;
 }
+
+export class FoundExpection {
+    name: string;
+    throwNode: ts.Node;
+}
