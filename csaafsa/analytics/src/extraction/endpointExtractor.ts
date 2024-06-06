@@ -2,6 +2,8 @@ import ts from "typescript";
 import {Endpoint} from "./model/endpoint";
 import {Extractor} from "./extractor";
 
+export const HTTP_METHODS = ["Get", "Head", "Post", "Put", "Patch", "Delete", "Connect", "Options", "Trace"]
+
 export class EndpointExtractor extends Extractor {
 
     static extractEndpoints(program: ts.Program, projectFiles: string[]) {
@@ -28,10 +30,10 @@ export class EndpointExtractor extends Extractor {
     private static extractEndpointFromMethod(methodDeclaration: ts.MethodDeclaration, urlPrefix: string): Endpoint | undefined {
         // get the type of the method
         const identifier = this.extractIdentifier(methodDeclaration)
-        const type = identifier.map((id) => id.escapedText).find((s) => s === "Get" || s === "Post" || s === "Patch" || s === "Delete")
+        const type = identifier.map((id) => id.escapedText).find((s) => HTTP_METHODS.includes(s.toString()))
         if (!type) { return undefined; }
         // safe all other decorators
-        const decoratorNames = identifier.map((id) => id.getText()).filter((s) => s !== "Get" && s !== "Post" && s !== "Patch" && s !== "Delete" && s.endsWith("Response") && s.startsWith("Api")).map((s) => s.substring(3, s.length - 8))
+        const decoratorNames = identifier.map((id) => id.getText()).filter((s) => !HTTP_METHODS.includes(s) && s.endsWith("Response") && s.startsWith("Api")).map((s) => s.substring(3, s.length - 8))
 
         return {
             name: methodDeclaration.name.getText(),

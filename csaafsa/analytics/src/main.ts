@@ -2,18 +2,19 @@ import {filterDatatypeFromPath, filterDirectoryFromPath, walk} from "./extractio
 import {DatatypeExtractor} from "./extraction/datatypeExtractor";
 import {MainDatatypeAnalyser} from "./analyseDatatype/mainDatatypeAnalyser";
 
-import * as ts from 'typescript';
+import ts from 'typescript';
 import {EndpointExtractor} from "./extraction/endpointExtractor";
 import {MainEndpointAnalyser} from "./analyseEndpoint/mainEndpointAnalyser";
 
+//TODO: remove hardcoded input at some point...
 const input = "D:/Java/werwolf-bot/digital-control-center/backend/src";
 //const input = "./analytics/src/assets";
 const mode = 'deep'
 
 walk(input, (err, projectFiles) => {
-    projectFiles = projectFiles.map((f) => f.replace(/\\/g, "/"))
+    projectFiles = projectFiles.map((f) => f.replace(/\\/g, "/")) // TODO: OS dependant?
     const program = ts.createProgram(projectFiles, {});
-    const checker = program.getTypeChecker()
+    const checker = program.getTypeChecker();
 
     // handle datatypes
     const datatypes = DatatypeExtractor.extractDatatypes(program, checker, projectFiles)

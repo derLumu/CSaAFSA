@@ -4,8 +4,6 @@ import ts from "typescript";
 
 type MethodOrConstructor = ts.MethodDeclaration | ts.ConstructorDeclaration
 
-// search for ThrowStatement
-
 export class ExceptionEndpointAnalyser {
 
     checker: ts.TypeChecker;
@@ -22,10 +20,11 @@ export class ExceptionEndpointAnalyser {
     analyseEndpoint(endpoint: Endpoint): ExceptionAnalysis {
         this.recursiveMethodOrConstructor(endpoint.methodObject)
         let unhandledCounter = 0;
-        Array.from(this.seenExceptions).forEach((exception) => {
+        this.seenExceptions.forEach((exception) => {
             if (!endpoint.handledExceptions.find(e => exception.includes(e))) {
                 unhandledCounter++;
-                console.warn(`Exception "${exception}" in endpoint "${endpoint.name}" with url "(${endpoint.type}) ${endpoint.url}" is not handled!`)
+                //TODO: remind the throw object or file path of it to display it here
+                console.warn(`Exception "${exception}" in endpoint "${endpoint.name}" with url "(${endpoint.type}) ${endpoint.url}" is not handled! \n - Found in File: ${endpoint.methodObject.getSourceFile().fileName}`)
             }
         })
         return {
@@ -73,7 +72,6 @@ export class ExceptionEndpointAnalyser {
             }
             return;
         }
-
 
         // continue traversing
         node.forEachChild((child) => this.recursiveNode(child))
