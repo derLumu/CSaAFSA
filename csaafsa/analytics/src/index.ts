@@ -4,29 +4,39 @@ import {MainDatatypeAnalyser} from "./analyseDatatype/mainDatatypeAnalyser";
 import {EndpointExtractor} from "./extraction/endpointExtractor";
 import {MainEndpointAnalyser} from "./analyseEndpoint/mainEndpointAnalyser";
 import ts from "typescript/lib/tsserverlibrary";
-
+import { consola, createConsola } from "consola";
 
 const input = "D:/Java/werwolf-bot/digital-control-center/backend/src";
 
 function main(input: string, program: ts.Program = undefined): ts.Diagnostic[] {
+    consola.start("Starting analysis")
     const projectFiles = walkSync(input).map((f) => f.replace(/\\/g, "/")) // TODO: OS dependant?
     !program && (program = ts.createProgram(projectFiles, {}));
     const checker = program.getTypeChecker();
+
+    consola.success("Fetched the project")
+    consola.start("Starting datatype analysis")
 
     // handle datatypes
     const datatypes = DatatypeExtractor.extractDatatypes(program, checker, projectFiles)
     const mainDatatypeAnalyser = new MainDatatypeAnalyser()
     let diagnostics: ts.Diagnostic[] = mainDatatypeAnalyser.analyseDatatypes(datatypes, "deep")
 
+    consola.success("Datatype analysis done")
+    consola.start("Starting endpoint analysis")
+
     // handle endpoints
     const endpoints = EndpointExtractor.extractEndpoints(program, projectFiles)
     const mainEndpointAnalyser = new MainEndpointAnalyser()
     diagnostics = diagnostics.concat(...mainEndpointAnalyser.analyseEndpoints(endpoints, checker, projectFiles, "deep"))
 
+    consola.success("Endpoint analysis done. We are done!");
+
     return diagnostics
 }
 
-console.log(main(input).map(d => d.messageText));
+const diagnostics = main(input);
+
 
 function init(modules: { typescript: typeof import("typescript/lib/tsserverlibrary") }) {
     const ts = modules.typescript;

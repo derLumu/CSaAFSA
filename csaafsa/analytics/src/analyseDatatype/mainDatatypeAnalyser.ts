@@ -1,5 +1,6 @@
 import {Datatype} from "../extraction/model/datatype";
 import ts from "typescript";
+import {consola} from "consola";
 
 export class MainDatatypeAnalyser {
 
@@ -89,19 +90,21 @@ export class MainDatatypeAnalyser {
     }
 
     private outputResults(): void {
-        console.log(`----------------------------------------------------------------------------\n`
-            + `Evaluation of Datatypes:\n`
-            + `Sum of Datatypes: ${this.sumOfDatatypesAll}\n`
-            + `Sum of Unique Datatypes (Name): ${this.sumOfDatatypesUniqueName}\n`
-            + `Boilerplate Score (Name): ${this.sumOfDatatypesUniqueName / this.sumOfDatatypesAll * 100}%\n`
-            + `Sum of Unique Datatypes (Content): ${this.sumOfDatatypesUniqueContent}\n`
-            + `Boilerplate Score (Content): ${this.sumOfDatatypesUniqueContent / this.sumOfDatatypesAll * 100}%\n`
-            + `Sum of Unique Datatypes (Content, ignoring Types): ${this.sumOfDatatypesUniqueContentIgnoringTypes}\n`
-            + `Boilerplate Score (Content, ignoring Types): ${this.sumOfDatatypesUniqueContentIgnoringTypes / this.sumOfDatatypesAll * 100}%\n`
-            + `Sum of Properties: ${this.sumOfPropertiesAll}\n`
-            + `Sum of Unique Properties (Name and Type): ${this.sumOfPropertiesUnique}\n`
-            + `Boilerplate Score (Name and Type): ${this.sumOfPropertiesUnique / this.sumOfPropertiesAll * 100}%\n`
-            + `----------------------------------------------------------------------------\n`)
+        consola.box(`Evaluation of Datatypes:\n\n`
+            + ` - Number of Datatypes found: ${this.sumOfDatatypesAll}\n`
+            + ` - That many datatypes have the same name: ${this.sumOfDatatypesAll - this.sumOfDatatypesUniqueName}\n`
+            + ` - So that is the percentage of uniquely named datatypes: ${(this.sumOfDatatypesUniqueName / this.sumOfDatatypesAll * 100).toFixed(2)}%\n\n`
+
+            + ` - That many datatypes have the same content: ${this.sumOfDatatypesAll - this.sumOfDatatypesUniqueContent}\n`
+            + ` - So that is the percentage of datatypes with unique content: ${(this.sumOfDatatypesUniqueContent / this.sumOfDatatypesAll * 100).toFixed(2)}%\n\n`
+
+            + ` - Let us ignore the types for a moment:\n`
+            + ` - That many datatypes have the same content regarding the property names: ${this.sumOfDatatypesAll - this.sumOfDatatypesUniqueContentIgnoringTypes}\n`
+            + ` - So that is the new percentage of datatypes with unique content: ${(this.sumOfDatatypesUniqueContentIgnoringTypes / this.sumOfDatatypesAll * 100).toFixed(2)}%\n\n`
+
+            + ` - Number of Properties found: ${this.sumOfPropertiesAll}\n`
+            + ` - You have used that many unique properties with regards to name and type: ${this.sumOfPropertiesUnique}\n`
+            + ` - That mean this percentage: ${(this.sumOfPropertiesUnique / this.sumOfPropertiesAll * 100).toFixed(2)}%\n`)
     }
 
     // https://stackoverflow.com/users/4925661/maciej-kravchyk

@@ -1,6 +1,7 @@
 import {Endpoint} from "../extraction/model/endpoint";
 import {ExceptionEndpointAnalyser} from "./exceptionEndpointAnalyser";
 import ts from "typescript";
+import { consola, createConsola } from "consola";
 
 export class ExceptionAnalysis {
     exceptionsThrown: number = 0;
@@ -80,16 +81,17 @@ export class MainEndpointAnalyser {
     }
 
     private outputResults() {
-        console.log(`----------------------------------------------------------------------------\n`
-            + `Evaluation of Endpoints:\n`
-            + `Sum of Endpoints: ${this.sumOfEndpoints}\n`
-            + `Sum of Unique Endpoints (Name): ${this.sumOfEndpointsUniqueName}\n`
-            + `Boilerplate Score (Name): ${this.sumOfEndpointsUniqueName / this.sumOfEndpoints * 100}%\n`
-            + `Sum of Unique Endpoints (URL): ${this.sumOfEndpointsUniqueUrl}\n`
-            + `Boilerplate Score (Content): ${this.sumOfEndpointsUniqueUrl / this.sumOfEndpoints * 100}%\n`
-            + `Sum Exceptions thrown: ${this.exceptionAnalysis.exceptionsThrown}\n`
-            + `Sum Exceptions handled: ${this.exceptionAnalysis.exceptionsThrown - this.exceptionAnalysis.exceptionsUnhandled}\n`
-            + `Handling Score (Exceptions): ${(this.exceptionAnalysis.exceptionsThrown - this.exceptionAnalysis.exceptionsUnhandled) / this.exceptionAnalysis.exceptionsThrown * 100}%\n`
-            + `----------------------------------------------------------------------------\n`)
+        consola.box(`Here is your Evaluation of Endpoints:\n\n`
+            + ` - Number of Endpoints found: ${this.sumOfEndpoints}\n`
+            + ` - I found this many Endpoints with the same method name: ${(this.sumOfEndpoints - this.sumOfEndpointsUniqueName)}\n`
+            + ` - That is the percentage of unique named endpoints: ${(this.sumOfEndpointsUniqueName / this.sumOfEndpoints * 100).toFixed(2)}%\n\n`
+
+            + ` - I found this many Endpoints with the same url: ${this.sumOfEndpoints - this.sumOfEndpointsUniqueUrl}\n`
+            + ` - That is the percentage of unique url endpoints: ${(this.sumOfEndpointsUniqueUrl / this.sumOfEndpoints * 100).toFixed(2)}%\n\n`
+
+            + ` - You have thrown this many Exceptions: ${this.exceptionAnalysis.exceptionsThrown}\n`
+            + ` - And this is the Number of handled Exceptions: ${this.exceptionAnalysis.exceptionsThrown - this.exceptionAnalysis.exceptionsUnhandled}\n`
+            + ` - That is the percentage of handled exceptions: ${((this.exceptionAnalysis.exceptionsThrown - this.exceptionAnalysis.exceptionsUnhandled) / this.exceptionAnalysis.exceptionsThrown * 100).toFixed(2)}%\n`
+        )
     }
 }
