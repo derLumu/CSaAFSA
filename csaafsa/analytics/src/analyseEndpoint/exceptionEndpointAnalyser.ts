@@ -2,9 +2,9 @@ import {Endpoint} from "../extraction/model/endpoint";
 import {ExceptionAnalysis} from "./mainEndpointAnalyser";
 import ts from "typescript";
 import fs from "fs";
-import {CONFIG_FILE_NAME} from "../main";
 
 type MethodOrConstructor = ts.MethodDeclaration | ts.ConstructorDeclaration
+const CONFIG_FILE_NAME = "config.json"
 
 export class ExceptionEndpointAnalyser {
 

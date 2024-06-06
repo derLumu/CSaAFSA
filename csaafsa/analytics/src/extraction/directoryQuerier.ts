@@ -51,3 +51,19 @@ export const filterDatatypeFromPath = (f: string) => {
 export const filterDirectoryFromPath = (f: string) => {
     return ContentChecker.isRelevantFromDirectory(f);
 };
+
+export function walkSync(dir): string [] {
+    const returnArray = []
+    const files = fs.readdirSync(dir);
+
+    for (const file of files) {
+        const pathToFile = path.join(dir, file);
+        const isDirectory = fs.statSync(pathToFile).isDirectory();
+        if (isDirectory && filterDirectoryFromPath(pathToFile)) {
+            returnArray.concat(...walkSync(pathToFile));
+        } else {
+            returnArray.push(pathToFile);
+        }
+    }
+    return returnArray;
+}
