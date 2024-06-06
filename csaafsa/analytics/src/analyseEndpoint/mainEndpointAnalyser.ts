@@ -39,7 +39,7 @@ export class MainEndpointAnalyser {
                     this.diagnostics.push({
                         file: t.methodObject.getSourceFile(),
                         start: t.methodObject.name.getStart(),
-                        length: t.methodObject.name.getEnd() - t.methodObject.name.getStart(),
+                        length: (t.methodObject.name.getEnd() - t.methodObject.name.getStart()) ? (t.methodObject.name.getEnd() - t.methodObject.name.getStart()) : 10,
                         messageText: `Endpoint name "${t.name}" is not unique!`,
                         category: ts.DiagnosticCategory.Warning,
                         code: 778,
@@ -51,7 +51,7 @@ export class MainEndpointAnalyser {
                     this.diagnostics.push({
                         file: t.methodObject.getSourceFile(),
                         start: t.methodObject.name.getStart(),
-                        length: t.methodObject.name.getEnd() - t.methodObject.name.getStart(),
+                        length: (t.methodObject.name.getEnd() - t.methodObject.name.getStart()) ? (t.methodObject.name.getEnd() - t.methodObject.name.getStart()) : 10,
                         messageText: `Endpoint url "${t.url}" is not unique! Found in:\n- ${t.filePath}\n- ${endpoints[j].filePath}`,
                         category: ts.DiagnosticCategory.Warning,
                         code: 778,

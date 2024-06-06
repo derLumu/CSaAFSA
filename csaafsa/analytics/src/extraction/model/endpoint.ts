@@ -2,7 +2,7 @@ import ts from "typescript";
 
 export class Endpoint {
     name: string;
-    type: "Get" | "Post" | "Patch" | "Delete";
+    type: "Get" | "Head" | "Post" | "Put" | "Patch" | "Delete" | "Connect" | "Options" | "Trace";
     url: string;
     handledExceptions: string[];
     methodObject:  ts.MethodDeclaration;

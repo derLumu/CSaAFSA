@@ -52,7 +52,7 @@ export class MainDatatypeAnalyser {
                     this.diagnostics.push({
                         file: t_i.nameObject.getSourceFile(),
                         start: t_i.nameObject.getStart(),
-                        length: t_i.nameObject.getEnd() - t_i.nameObject.getStart(),
+                        length: (t_i.nameObject.getEnd() - t_i.nameObject.getStart())? (t_i.nameObject.getEnd() - t_i.nameObject.getStart()) : 10,
                         messageText: `Datatype content is not Unique! Found in:\n- ${t_i.path}\n- ${t_j.path}`,
                         category: ts.DiagnosticCategory.Warning,
                         code: 777,
