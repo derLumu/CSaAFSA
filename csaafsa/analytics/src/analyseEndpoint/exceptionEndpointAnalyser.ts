@@ -1,6 +1,8 @@
 import {Endpoint} from "../extraction/model/endpoint";
 import {ExceptionAnalysis} from "./mainEndpointAnalyser";
 import ts from "typescript";
+import fs from "fs";
+import {CONFIG_FILE_NAME} from "../main";
 
 type MethodOrConstructor = ts.MethodDeclaration | ts.ConstructorDeclaration
 
@@ -8,6 +10,8 @@ export class ExceptionEndpointAnalyser {
 
     checker: ts.TypeChecker;
     projectFiles: string[]
+
+    mappedExceptions: { "stringMatch": string, "ExceptionToHandle": string }[]  = []
 
     seenMethods: Set<number> = new Set()
     seenExceptions: Set<string> = new Set()
@@ -18,6 +22,7 @@ export class ExceptionEndpointAnalyser {
     }
 
     analyseEndpoint(endpoint: Endpoint): ExceptionAnalysis {
+        this.loadMappedExceptions()
         this.recursiveMethodOrConstructor(endpoint.methodObject)
         let unhandledCounter = 0;
         this.seenExceptions.forEach((exception) => {
@@ -27,6 +32,7 @@ export class ExceptionEndpointAnalyser {
                 console.warn(`Exception "${exception}" in endpoint "${endpoint.name}" with url "(${endpoint.type}) ${endpoint.url}" is not handled! \n - Found in File: ${endpoint.methodObject.getSourceFile().fileName}`)
             }
         })
+        console.log(this.seenExceptions)
         return {
             exceptionsThrown: this.seenExceptions.size,
             exceptionsUnhandled: unhandledCounter
@@ -53,6 +59,11 @@ export class ExceptionEndpointAnalyser {
             return;
         }
 
+        if (node.kind == ts.SyntaxKind.Identifier) {
+            const match = this.mappedExceptions.find((exception) => node.getText().toLowerCase().includes(exception.stringMatch.toLowerCase()))
+            if (match) { this.seenExceptions.add(match.ExceptionToHandle) }
+        }
+
         // check if the node is a call -> get the symbol -> search the extracted constructor or method
         if (node.kind === ts.SyntaxKind.NewExpression || node.kind === ts.SyntaxKind.PropertyAccessExpression) {
             if (node.kind === ts.SyntaxKind.NewExpression) {
@@ -77,4 +88,13 @@ export class ExceptionEndpointAnalyser {
         node.forEachChild((child) => this.recursiveNode(child))
     }
 
+    private loadMappedExceptions() {
+        if (!fs.existsSync("./analytics/src/" + CONFIG_FILE_NAME)) { return }
+        const configFile = fs.readFileSync("./analytics/src/" + CONFIG_FILE_NAME, 'utf-8');
+        const config = JSON.parse(configFile)
+        if (!config.mappedExceptions) { return }
+        config.mappedExceptions.forEach((exception: { "stringMatch": string, "ExceptionToHandle": string }) => {
+            this.mappedExceptions.push(exception);
+        })
+    }
 }

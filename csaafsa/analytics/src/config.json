@@ -1,0 +1,8 @@
+{
+  "mappedExceptions": [
+    {
+      "stringMatch": "prisma",
+      "ExceptionToHandle": "ApiBadGatewayResponse"
+    }
+  ]
+}

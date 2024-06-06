@@ -11,6 +11,8 @@ const input = "D:/Java/werwolf-bot/digital-control-center/backend/src";
 //const input = "./analytics/src/assets";
 const mode = 'deep'
 
+export const CONFIG_FILE_NAME = "config.json"
+
 walk(input, (err, projectFiles) => {
     projectFiles = projectFiles.map((f) => f.replace(/\\/g, "/")) // TODO: OS dependant?
     const program = ts.createProgram(projectFiles, {});
