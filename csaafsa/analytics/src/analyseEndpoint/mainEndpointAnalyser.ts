@@ -14,7 +14,7 @@ export class MainEndpointAnalyser {
     sumOfEndpointsUniqueUrl: number = 0;
     exceptionAnalysis: ExceptionAnalysis = { exceptionsThrown: 0, exceptionsUnhandled: 0 }
 
-    public analyseEndpoints(endpoints: Endpoint[], checker: ts.TypeChecker, projectFiles: string[], mode: 'fast' | 'deep'): void {
+    public analyseEndpoints(endpoints: Endpoint[], checker: ts.TypeChecker, projectFiles: string[], mode: 'fast' | 'deep'): ts.Diagnostic[] {
         // start analysis
         this.sumOfEndpoints = endpoints.length
         this.checkEndpointsUniqueNameAndUrl(endpoints)
@@ -23,6 +23,7 @@ export class MainEndpointAnalyser {
         this.exceptionAnalysis = this.analyseExceptionHandling(endpoints, checker, projectFiles)
 
         this.outputResults()
+        return []
     }
 
     private checkEndpointsUniqueNameAndUrl(endpoints: Endpoint[]) {

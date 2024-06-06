@@ -21,6 +21,7 @@ export class DatatypeExtractor extends Extractor {
         // if no properties are found, the class is not a (relevant) datatype
         return properties.length === 0 ? undefined :{
             name: classDeclaration.name.escapedText,
+            nameObject: classDeclaration.name,
             decorators: decorators,
             properties: properties,
             path: classDeclaration.getSourceFile().fileName
@@ -36,6 +37,7 @@ export class DatatypeExtractor extends Extractor {
     private static buildDatatypeProperty(attribute: ts.PropertyDeclaration, checker: ts.TypeChecker): DatatypeProperty {
         return {
             name: (attribute.name as ts.Identifier).escapedText,
+            nameObject: attribute.name as ts.Identifier,
             typeId: (checker.getTypeAtLocation(attribute.type) as unknown as {id: number}).id as number,
             decorators: this.extractDecorators(attribute)
         } as DatatypeProperty;

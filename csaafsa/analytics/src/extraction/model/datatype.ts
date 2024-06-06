@@ -2,6 +2,7 @@ import * as ts from "typescript";
 
 export class Datatype {
     public name: string;
+    public nameObject: ts.Identifier;
     public decorators: ts.Decorator[];
     public properties: DatatypeProperty[];
 
@@ -10,6 +11,7 @@ export class Datatype {
 
 export class DatatypeProperty {
     public name: string;
+    public nameObject: ts.Identifier;
     public typeId: number;
     public decorators: ts.Decorator[];
 }

@@ -1,4 +1,5 @@
 import {Datatype} from "../extraction/model/datatype";
+import ts from "typescript";
 
 export class MainDatatypeAnalyser {
 
@@ -9,7 +10,9 @@ export class MainDatatypeAnalyser {
     sumOfPropertiesAll: number = 0
     sumOfPropertiesUnique: number = 0
 
-    public analyseDatatypes(datatypes: Datatype[], mode: 'fast' | 'deep'): void {
+    diagnostics: ts.Diagnostic[] = []
+
+    public analyseDatatypes(datatypes: Datatype[], mode: 'fast' | 'deep'): ts.Diagnostic[] {
         // start analysis
         this.sumOfDatatypesAll = datatypes.length
         this.checkDatatypesUniqueName(datatypes)
@@ -20,6 +23,8 @@ export class MainDatatypeAnalyser {
         this.sumOfPropertiesUnique = this.getSumOfPropertiesUnique(datatypes)
 
         this.outputResults()
+
+        return this.diagnostics
     }
 
     private checkDatatypesUniqueName(datatypes: Datatype[]): void {
@@ -27,12 +32,31 @@ export class MainDatatypeAnalyser {
             for (let j = i + 1; j < datatypes.length; j++) {
                 // for all pair of datatypes check if the name and attributes are unique
                 if (datatypes[i].name === datatypes[j].name) {
-                    console.warn(`Datatype with name "${datatypes[i].name}" is not unique! Name found in:\n- ${datatypes[i].path}\n- ${datatypes[j].path}\n`)
+                    const t = datatypes[i]
+                    this.diagnostics.push({
+                        file: t.nameObject.getSourceFile(),
+                        start: t.nameObject.getStart(),
+                        length: t.nameObject.getEnd() - t.nameObject.getStart(),
+                        messageText: `Datatype name "${t.name}" is not unique!`,
+                        category: ts.DiagnosticCategory.Warning,
+                        code: 777,
+                        source: 'DatatypeAnalyser'
+                    })
                 }
                 const propertiesI = datatypes[i].properties.map((property) => property.name)
                 const propertiesJ = datatypes[j].properties.map((property) => property.name)
                 if (this.arrayCompare(propertiesI, propertiesJ)) {
-                    console.warn(`Datatype with name "${datatypes[i].name}" and "${datatypes[j].name}" have the same properties! Found in:\n- ${datatypes[i].path}\n- ${datatypes[j].path}\n`)
+                    const t_i = datatypes[i]
+                    const t_j = datatypes[j]
+                    this.diagnostics.push({
+                        file: t_i.nameObject.getSourceFile(),
+                        start: t_i.nameObject.getStart(),
+                        length: t_i.nameObject.getEnd() - t_i.nameObject.getStart(),
+                        messageText: `Datatype content is not Unique! Found in:\n- ${t_i.path}\n- ${t_j.path}`,
+                        category: ts.DiagnosticCategory.Warning,
+                        code: 777,
+                        source: 'DatatypeAnalyser'
+                    })
                 }
 
             }

@@ -3,28 +3,29 @@ import {DatatypeExtractor} from "./extraction/datatypeExtractor";
 import {MainDatatypeAnalyser} from "./analyseDatatype/mainDatatypeAnalyser";
 import {EndpointExtractor} from "./extraction/endpointExtractor";
 import {MainEndpointAnalyser} from "./analyseEndpoint/mainEndpointAnalyser";
+import ts from "typescript/lib/tsserverlibrary";
 
-/*
+
 const input = "D:/Java/werwolf-bot/digital-control-center/backend/src";
 
-function main(input: string) {
+function main(input: string, program: ts.Program = undefined): ts.Diagnostic[] {
     const projectFiles = walkSync(input).map((f) => f.replace(/\\/g, "/")) // TODO: OS dependant?
-    const program = ts.createProgram(projectFiles, {});
+    !program && (program = ts.createProgram(projectFiles, {}));
     const checker = program.getTypeChecker();
 
     // handle datatypes
     const datatypes = DatatypeExtractor.extractDatatypes(program, checker, projectFiles)
     const mainDatatypeAnalyser = new MainDatatypeAnalyser()
-    mainDatatypeAnalyser.analyseDatatypes(datatypes, "deep")
+    const diagnostics: ts.Diagnostic[] = mainDatatypeAnalyser.analyseDatatypes(datatypes, "deep")
 
     // handle endpoints
     const endpoints = EndpointExtractor.extractEndpoints(program, projectFiles)
     const mainEndpointAnalyser = new MainEndpointAnalyser()
-    mainEndpointAnalyser.analyseEndpoints(endpoints, checker, projectFiles, "deep")
+    diagnostics.concat(...mainEndpointAnalyser.analyseEndpoints(endpoints, checker, projectFiles, "deep"))
+
+    return diagnostics
 }
 main(input);
- */
-
 
 function init(modules: { typescript: typeof import("typescript/lib/tsserverlibrary") }) {
     const ts = modules.typescript;
@@ -32,7 +33,6 @@ function init(modules: { typescript: typeof import("typescript/lib/tsserverlibra
     function create(info: ts.server.PluginCreateInfo) {
         // Get a list of things to remove from the completion list from the config object.
         // If nothing was specified, we'll just remove 'caller'
-        const whatToRemove: string[] = info.config.remove || ["caller"];
 
         // Set up decorator object
         const proxy: ts.LanguageService = Object.create(null);
@@ -41,14 +41,16 @@ function init(modules: { typescript: typeof import("typescript/lib/tsserverlibra
             proxy[k] = (...args: Array<{}>) => x.apply(info.languageService, args);
         }
 
-        // Remove specified entries from completion list
-        proxy.getCompletionsAtPosition = (fileName, position, options) => {
-            const prior = info.languageService.getCompletionsAtPosition(fileName, position, options);
-            if (!prior) return
-            prior.entries.push({ name: "testThePlugin", kind: ts.ScriptElementKind.keyword, kindModifiers: ts.ScriptElementKindModifier.none, sortText: "0" });
+        proxy.getSemanticDiagnostics = (filename) => {
+            const prior = info.languageService.getSemanticDiagnostics(filename);
+            const program = info.languageService.getProgram();
+            if (!program) {
+                return prior;
+            }
 
-            return prior;
-        };
+            const diagnostics = main(filename, program);
+            return [...prior, ...diagnostics];
+        }
 
         return proxy;
     }
