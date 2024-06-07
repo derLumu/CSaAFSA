@@ -1,7 +1,7 @@
 import {Endpoint} from "../extraction/model/endpoint";
 import {ExceptionEndpointAnalyser} from "./exceptionEndpointAnalyser";
 import ts from "typescript";
-import { consola, createConsola } from "consola";
+import {consola} from "consola";
 import {HandledExceptionEndpointAnalyser} from "./handledExectionEndpointAnalyser";
 
 export class ExceptionAnalysis {

@@ -1,4 +1,4 @@
-import ts, {CallExpression, MethodDeclaration, TypeAliasDeclaration} from "typescript";
+import ts from "typescript";
 import {Endpoint} from "./model/endpoint";
 import {Extractor} from "./extractor";
 
