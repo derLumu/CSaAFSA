@@ -7,48 +7,37 @@ import ts from "typescript/lib/tsserverlibrary";
 //import { consola } from "consola";
 
 
-
-//const input = "D:/Java/werwolf-bot/digital-control-center/backend/src";
-
 function main(input: string, program: ts.Program = undefined, projectFiles: string[] = [], info: ts.server.PluginCreateInfo = undefined): ts.Diagnostic[] {
     //consola.start("Starting analysis")
     if (projectFiles.length == 0) {
         projectFiles = walkSync(input) // TODO: OS dependant?
     }
     projectFiles = projectFiles.map((f) => f.replace(/\\/g, "/"))
-
     program = ts.createProgram(projectFiles, {});
     const checker = program.getTypeChecker();
 
     //consola.success("Fetched the project")
     //consola.start("Starting datatype analysis")
 
+    // get instances of the analysers
+    const mainDatatypeAnalyser = new MainDatatypeAnalyser()
+    const mainEndpointAnalyser = new MainEndpointAnalyser()
+
     // handle datatypes
     const datatypes = DatatypeExtractor.extractDatatypes(program, checker, projectFiles)
-    const mainDatatypeAnalyser = new MainDatatypeAnalyser()
     let diagnostics: ts.Diagnostic[] = mainDatatypeAnalyser.analyseDatatypes(datatypes, "deep")
 
     //consola.success("Datatype analysis done")
     //consola.start("Starting endpoint analysis")
 
     // handle endpoints
-    const endpoints = EndpointExtractor.extractEndpoints(program, projectFiles)
-    const mainEndpointAnalyser = new MainEndpointAnalyser()
+    const endpoints = EndpointExtractor.extractEndpoints(program, projectFiles, checker)
     diagnostics = diagnostics.concat(...mainEndpointAnalyser.analyseEndpoints(endpoints, checker, projectFiles, "deep"))
-
-    if (info) {
-        info.project.projectService.logger.info(
-            projectFiles.map((f) => program.getSourceFile(f).fileName).join("\n")
-        );
-    }
 
     //consola.success("Endpoint analysis done. We are done!");
 
     return diagnostics
 }
-
-//const diagnostics = main(input);
-
 
 function init(modules: { typescript: typeof import("typescript/lib/tsserverlibrary") }) {
     const ts = modules.typescript;
@@ -80,3 +69,7 @@ function init(modules: { typescript: typeof import("typescript/lib/tsserverlibra
 }
 
 export = init;
+
+// use next lines when using serve
+const input = "D:/Java/werwolf-bot/digital-control-center/backend/src";
+const diagnostics = main(input);

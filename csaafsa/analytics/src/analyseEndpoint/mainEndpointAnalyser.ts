@@ -2,6 +2,7 @@ import {Endpoint} from "../extraction/model/endpoint";
 import {ExceptionEndpointAnalyser} from "./exceptionEndpointAnalyser";
 import ts from "typescript";
 import { consola, createConsola } from "consola";
+import {HandledExceptionEndpointAnalyser} from "./handledExectionEndpointAnalyser";
 
 export class ExceptionAnalysis {
     exceptionsThrown: number = 0;
@@ -24,6 +25,7 @@ export class MainEndpointAnalyser {
         this.checkEndpointsUniqueNameAndUrl(endpoints)
         this.sumOfEndpointsUniqueName = this.getSumOfEndpointsUniqueName(endpoints)
         this.sumOfEndpointsUniqueUrl = this.getSumOfEndpointsUniqueUrl(endpoints)
+        endpoints = this.extractNestedHandledExceptions(endpoints, checker, projectFiles)
         this.exceptionAnalysis = this.analyseExceptionHandling(endpoints, checker, projectFiles)
 
         this.outputResults()
@@ -77,7 +79,10 @@ export class MainEndpointAnalyser {
             exceptionsUnhandled: exceptionAnalysis.map((a) => a.exceptionsUnhandled).reduce((sum, current) => sum + current, 0),
             diagnostics: exceptionAnalysis.map((a) => a.diagnostics).reduce((sum, current) => sum.concat(current), [])
         }
+    }
 
+    private extractNestedHandledExceptions(endpoints: Endpoint[], checker: ts.TypeChecker, projectFiles: string[]): Endpoint[] {
+        return endpoints.map((endpoint) => new HandledExceptionEndpointAnalyser(checker, projectFiles).analyseEndpoint(endpoint))
     }
 
     private outputResults() {
@@ -94,4 +99,5 @@ export class MainEndpointAnalyser {
             + ` - That is the percentage of handled exceptions: ${((this.exceptionAnalysis.exceptionsThrown - this.exceptionAnalysis.exceptionsUnhandled) / this.exceptionAnalysis.exceptionsThrown * 100).toFixed(2)}%\n`
         )
     }
+
 }
