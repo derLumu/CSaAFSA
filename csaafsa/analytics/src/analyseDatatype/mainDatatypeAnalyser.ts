@@ -23,8 +23,6 @@ export class MainDatatypeAnalyser {
         this.sumOfPropertiesAll = datatypes.map((datatype) => datatype.properties.length).reduce((a, b) => a + b, 0)
         this.sumOfPropertiesUnique = this.getSumOfPropertiesUnique(datatypes)
 
-        this.outputResults()
-
         return this.diagnostics
     }
 
@@ -89,7 +87,7 @@ export class MainDatatypeAnalyser {
         return new Set(datatypes.flatMap((datatype) => datatype.properties.map((property) => property.name + "," + property.typeId))).size
     }
 
-    private outputResults(): void {
+    public outputResults(): void {
         consola.box(`Evaluation of Datatypes:\n\n`
             + ` - Number of Datatypes found: ${this.sumOfDatatypesAll}\n`
             + ` - That many datatypes have the same name: ${this.sumOfDatatypesAll - this.sumOfDatatypesUniqueName}\n`

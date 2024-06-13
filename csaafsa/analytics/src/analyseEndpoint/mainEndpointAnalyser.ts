@@ -27,8 +27,6 @@ export class MainEndpointAnalyser {
         this.sumOfEndpointsUniqueUrl = this.getSumOfEndpointsUniqueUrl(endpoints)
         endpoints = this.extractNestedHandledExceptions(endpoints, checker, projectFiles)
         this.exceptionAnalysis = this.analyseExceptionHandling(endpoints, checker, projectFiles)
-
-        this.outputResults()
         return [...this.diagnostics, ...this.exceptionAnalysis.diagnostics]
     }
 
@@ -85,7 +83,7 @@ export class MainEndpointAnalyser {
         return endpoints.map((endpoint) => new HandledExceptionEndpointAnalyser(checker, projectFiles).analyseEndpoint(endpoint))
     }
 
-    private outputResults() {
+    public outputResults() {
         consola.box(`Here is your Evaluation of Endpoints:\n\n`
             + ` - Number of Endpoints found: ${this.sumOfEndpoints}\n`
             + ` - I found this many Endpoints with the same method name: ${(this.sumOfEndpoints - this.sumOfEndpointsUniqueName)}\n`
