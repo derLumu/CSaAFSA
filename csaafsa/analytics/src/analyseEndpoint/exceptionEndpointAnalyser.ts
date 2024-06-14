@@ -3,7 +3,7 @@ import {ExceptionAnalysis} from "./mainEndpointAnalyser";
 import ts from "typescript";
 import fs from "fs";
 
-type MethodOrConstructor = ts.MethodDeclaration | ts.ConstructorDeclaration
+export type MethodOrConstructor = ts.MethodDeclaration | ts.ConstructorDeclaration
 const CONFIG_FILE_NAME = "config.json"
 
 export class ExceptionEndpointAnalyser {

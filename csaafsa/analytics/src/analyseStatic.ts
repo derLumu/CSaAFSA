@@ -5,14 +5,28 @@ import {DatatypeExtractor} from "./extraction/datatypeExtractor";
 import {EndpointExtractor} from "./extraction/endpointExtractor";
 import ts from "typescript/lib/tsserverlibrary";
 import { consola } from "consola";
+import {ApiCallExtractor} from "./extraction/apiCallExtractor";
 
-export function analyseStatic(input: string, projectFiles: string[] = []): void {
+export function analyseStatic(inputBE: string, inputFE: string): void {
     consola.start("Starting analysis")
-    if (projectFiles.length == 0) {
-        projectFiles = walkSync(input)
-    }
-    projectFiles = projectFiles.map((f) => f.replace(/\\/g, "/"))
-    const program = ts.createProgram(projectFiles, {});
+
+    /*
+    //TODO: TESTING the FE part
+    let frontendFiles = [inputFE]
+    frontendFiles = frontendFiles.map((f) => f.replace(/\\/g, "/"))
+    const programFE = ts.createProgram(frontendFiles, {});
+    const checkerFE = programFE.getTypeChecker();
+
+    const apiCallExtractor = new ApiCallExtractor()
+    const apiCalls = apiCallExtractor.extractApiCalls(programFE, frontendFiles, checkerFE)
+
+    return
+    */
+
+
+    let backendFiles = walkSync(inputBE)
+    backendFiles = backendFiles.map((f) => f.replace(/\\/g, "/"))
+    const program = ts.createProgram(backendFiles, {});
     const checker = program.getTypeChecker();
 
     consola.success("Fetched the project")
@@ -23,7 +37,7 @@ export function analyseStatic(input: string, projectFiles: string[] = []): void 
     const mainEndpointAnalyser = new MainEndpointAnalyser()
 
     // handle datatypes
-    const datatypes = DatatypeExtractor.extractDatatypes(program, checker, projectFiles)
+    const datatypes = DatatypeExtractor.extractDatatypes(program, checker, backendFiles)
     mainDatatypeAnalyser.analyseDatatypes(datatypes, "deep")
     mainDatatypeAnalyser.outputResults()
 
@@ -31,8 +45,8 @@ export function analyseStatic(input: string, projectFiles: string[] = []): void 
     consola.start("Starting endpoint analysis")
 
     // handle endpoints
-    const endpoints = EndpointExtractor.extractEndpoints(program, projectFiles, checker)
-    mainEndpointAnalyser.analyseEndpoints(endpoints, checker, projectFiles, "deep")
+    const endpoints = EndpointExtractor.extractEndpoints(program, backendFiles, checker)
+    mainEndpointAnalyser.analyseEndpoints(endpoints, checker, backendFiles, "deep")
     mainEndpointAnalyser.outputResults()
 
     consola.success("Endpoint analysis done. We are done!");

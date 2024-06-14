@@ -1,5 +1,7 @@
 import ts from "typescript";
 
+export const HTTP_METHODS = ["Get", "Head", "Post", "Put", "Patch", "Delete", "Connect", "Options", "Trace"]
+
 export class Extractor {
 
     public static fileNamesToSourceFiles(program: ts.Program, projectFiles: string[]): ts.SourceFile[] {

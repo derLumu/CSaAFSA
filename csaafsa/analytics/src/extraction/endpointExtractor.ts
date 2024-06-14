@@ -1,8 +1,6 @@
 import ts from "typescript";
 import {Endpoint} from "./model/endpoint";
-import {Extractor} from "./extractor";
-
-export const HTTP_METHODS = ["Get", "Head", "Post", "Put", "Patch", "Delete", "Connect", "Options", "Trace"]
+import {Extractor, HTTP_METHODS} from "./extractor";
 
 export class EndpointExtractor extends Extractor {
 

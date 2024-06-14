@@ -1,6 +1,6 @@
 import {Endpoint} from "../extraction/model/endpoint";
 import ts, {CallExpression, MethodDeclaration} from "typescript";
-import {HTTP_METHODS} from "../extraction/endpointExtractor";
+import {HTTP_METHODS} from "../extraction/extractor";
 
 type MethodOrConstructor = ts.MethodDeclaration | ts.ConstructorDeclaration
 
