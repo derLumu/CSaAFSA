@@ -36,7 +36,7 @@ export class ExceptionEndpointAnalyser {
                     file: exception.throwNode.getSourceFile(),
                     start: exception.throwNode.getStart(),
                     length: (exception.throwNode.getEnd() - exception.throwNode.getStart())? (exception.throwNode.getEnd() - exception.throwNode.getStart()) : 10,
-                    messageText: `Exception "${exception.name}" is not handled in endpoint "${endpoint.name}"!`,
+                    messageText: `Exception "${exception.name}" is not documented in endpoint "${endpoint.name}"!`,
                     category: ts.DiagnosticCategory.Warning,
                     code: 779,
                     source: 'EndpointAnalyser'
