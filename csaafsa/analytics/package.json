@@ -1,0 +1,11 @@
+{
+  "name": "analytics",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "scripts": {
+    "build": "tsc -p ."
+  },
+  "dependencies": {
+    "typescript": "^4.5.4"
+  }
+}

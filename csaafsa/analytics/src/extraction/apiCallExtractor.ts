@@ -1,12 +1,13 @@
 import {Extractor} from "./extractor";
 import ts from "typescript/lib/tsserverlibrary";
+import {ApiCall} from "./model/endpoint";
 
 export class ApiCallExtractor  extends Extractor{
 
     private hasHTTPMethode = /(Get|Head|Post|Put|Patch|Delete|Connect|Options|Trace)/gi;
     private isApiCall = /(http|localhost)/gi;
 
-    private apiCalls: string[] = []
+    private apiCalls: ApiCall[] = []
 
     public extractApiCalls(program: ts.Program, projectFiles: string[], checker: ts.TypeChecker) {
         const sourceFiles = Extractor.fileNamesToSourceFiles(program, projectFiles);
@@ -27,7 +28,7 @@ export class ApiCallExtractor  extends Extractor{
             const methode = node.getChildren().find((child) => child.kind === ts.SyntaxKind.PropertyAccessExpression)?.getText().split(".").pop()
             const syntaxList = node.getChildren().find((child) => child.kind === ts.SyntaxKind.SyntaxList) as ts.SyntaxList
             if (methode && methode.match(this.hasHTTPMethode) && syntaxList) {
-                this.buildApiCall(methode, syntaxList)
+                this.buildApiCall(methode, syntaxList, checker)
             }
         }
 
@@ -35,10 +36,30 @@ export class ApiCallExtractor  extends Extractor{
         node.forEachChild((child) => this.recursiveNode(child, checker))
     }
 
-    private buildApiCall(methode: string, syntaxList: ts.SyntaxList) {
-        console.log(syntaxList.getChildren()[0]?.getChildren().map((child) => child.getText()))
-        const children = syntaxList.getChildren()
-        if (!children || children.length == 0) { return }
-        //TODO: replace all PropertyAccesses with their real StringLiteral
+    private buildApiCall(methode: string, syntaxList: ts.SyntaxList, checker: ts.TypeChecker) {
+        const urlNode = syntaxList.getChildren()[0]
+        if (!urlNode) { return }
+        const urlString = urlNode.getChildren().flatMap((child) => this.recursiveSyntaxList(child, checker)).join("")
+        if (urlString.match(this.isApiCall)) {
+            this.apiCalls.push({
+                method: methode,
+                url: urlString,
+                filePath: urlNode.getSourceFile().fileName
+            })
+        }
+    }
+
+    private recursiveSyntaxList(node: ts.Node, checker: ts.TypeChecker): string {
+        if (!node) { return "" }
+        if (node.kind === ts.SyntaxKind.StringLiteral) {
+            return node.getText()
+        }
+
+        if (node.kind === ts.SyntaxKind.PropertyAccessExpression) {
+            const initializer = (checker.getSymbolAtLocation(node)?.valueDeclaration as ts.PropertyAssignment).initializer
+            return this.recursiveSyntaxList(initializer, checker)
+        }
+
+        return node.getChildren().flatMap((child) => this.recursiveSyntaxList(child, checker)).join("")
     }
 }

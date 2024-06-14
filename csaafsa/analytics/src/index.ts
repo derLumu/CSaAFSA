@@ -6,5 +6,5 @@ export = init;
 
 // start commandline tool
 const inputBE = "D:/Java/werwolf-bot/digital-control-center/backend/src";
-const inputFE = "D:/Java/werwolf-bot/digital-control-center/frontend/src/app/edit-complex-rights/edit-complex-rights.component.ts";
+const inputFE = "D:/Java/werwolf-bot/digital-control-center/frontend/src";
 analyseStatic(inputBE, inputFE);

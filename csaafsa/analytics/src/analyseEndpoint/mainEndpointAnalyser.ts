@@ -1,4 +1,4 @@
-import {Endpoint} from "../extraction/model/endpoint";
+import {ApiCall, Endpoint} from "../extraction/model/endpoint";
 import {ExceptionEndpointAnalyser} from "./exceptionEndpointAnalyser";
 import ts from "typescript";
 import {consola} from "consola";
@@ -15,11 +15,12 @@ export class MainEndpointAnalyser {
     sumOfEndpoints: number = 0;
     sumOfEndpointsUniqueName: number = 0;
     sumOfEndpointsUniqueUrl: number = 0;
+    sumofUnusedEndpoints: number = 0;
     exceptionAnalysis: ExceptionAnalysis = { exceptionsThrown: 0, exceptionsUnhandled: 0, diagnostics: []}
 
     diagnostics: ts.Diagnostic[] = []
 
-    public analyseEndpoints(endpoints: Endpoint[], checker: ts.TypeChecker, projectFiles: string[], mode: 'fast' | 'deep'): ts.Diagnostic[] {
+    public analyseEndpoints(endpoints: Endpoint[], checker: ts.TypeChecker, projectFiles: string[], apiCalls: ApiCall[], mode: 'fast' | 'deep'): ts.Diagnostic[] {
         // start analysis
         this.sumOfEndpoints = endpoints.length
         this.checkEndpointsUniqueNameAndUrl(endpoints)
@@ -27,6 +28,7 @@ export class MainEndpointAnalyser {
         this.sumOfEndpointsUniqueUrl = this.getSumOfEndpointsUniqueUrl(endpoints)
         endpoints = this.extractNestedHandledExceptions(endpoints, checker, projectFiles)
         this.exceptionAnalysis = this.analyseExceptionHandling(endpoints, checker, projectFiles)
+        this.sumofUnusedEndpoints = this.getSumOfUnusedEndpoints(endpoints, apiCalls)
         return [...this.diagnostics, ...this.exceptionAnalysis.diagnostics]
     }
 
@@ -92,10 +94,35 @@ export class MainEndpointAnalyser {
             + ` - I found this many Endpoints with the same url: ${this.sumOfEndpoints - this.sumOfEndpointsUniqueUrl}\n`
             + ` - That is the percentage of unique url endpoints: ${(this.sumOfEndpointsUniqueUrl / this.sumOfEndpoints * 100).toFixed(2)}%\n\n`
 
+            + ` - Looking at your Frontend you have this many unused Endpoints: ${this.sumofUnusedEndpoints}\n`
+            + ` - That is the percentage of used endpoints: ${((this.sumOfEndpoints - this.sumofUnusedEndpoints) / this.sumOfEndpoints * 100).toFixed(2)}%\n\n`
+
             + ` - You have thrown this many Exceptions: ${this.exceptionAnalysis.exceptionsThrown}\n`
             + ` - And this is the Number of handled Exceptions: ${this.exceptionAnalysis.exceptionsThrown - this.exceptionAnalysis.exceptionsUnhandled}\n`
             + ` - That is the percentage of handled exceptions: ${((this.exceptionAnalysis.exceptionsThrown - this.exceptionAnalysis.exceptionsUnhandled) / this.exceptionAnalysis.exceptionsThrown * 100).toFixed(2)}%\n`
         )
     }
 
+    private getSumOfUnusedEndpoints(endpoints: Endpoint[], apiCalls: ApiCall[]) {
+        let counter = 0;
+        endpoints.forEach((endpoint) => {
+            const endpointSplit = endpoint.url.split("/").map((e) => e.replace(/["']/g, "")).filter((e) => e !== "" && !e.startsWith(":"))
+            const calls = apiCalls.filter((call) => call.method.toLowerCase() === endpoint.type.toLowerCase())
+                .filter((call) => endpointSplit.every((e) => call.url.includes(e)))
+
+            if (calls.length === 0) {
+                counter++
+                this.diagnostics.push({
+                    file: endpoint.methodObject.getSourceFile(),
+                    start: endpoint.methodObject.name.getStart(),
+                    length: (endpoint.methodObject.name.getEnd() - endpoint.methodObject.name.getStart()) ? (endpoint.methodObject.name.getEnd() - endpoint.methodObject.name.getStart()) : 10,
+                    messageText: `Endpoint not used in frontend!`,
+                    category: ts.DiagnosticCategory.Warning,
+                    code: 778,
+                    source: 'EndpointAnalyser'
+                })
+            }
+        })
+        return counter;
+    }
 }

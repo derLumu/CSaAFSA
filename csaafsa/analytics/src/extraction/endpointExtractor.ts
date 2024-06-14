@@ -16,9 +16,9 @@ export class EndpointExtractor extends Extractor {
         if (!identifier.map((id) => id.escapedText).find((s) => s === "Controller")) { return undefined; }
 
         // extract the path prefix from the controller
-        const apiTags = identifier.find((s) => s.escapedText === "ApiTags")
+        const apiTags = identifier.find((s) => s.escapedText === "Controller")
         if (!apiTags) { return undefined; }
-        const urlPrefix = (apiTags.parent as ts.CallExpression).arguments[0].getText()
+        const urlPrefix = (apiTags.parent as ts.CallExpression).arguments[0]?.getText()
 
         // extract methods from the controller
         const methods: ts.MethodDeclaration[] = classDeclaration.members.filter((member) => member.kind === ts.SyntaxKind.MethodDeclaration) as ts.MethodDeclaration[];
@@ -32,11 +32,12 @@ export class EndpointExtractor extends Extractor {
         if (!type) { return undefined; }
         // safe all other decorators
         const decoratorNames = identifier.map((id) => id.getText()).filter((s) => !HTTP_METHODS.includes(s) && s.endsWith("Response") && s.startsWith("Api")).map((s) => s.substring(3, s.length - 8))
+        const path = (identifier.find((s) => HTTP_METHODS.includes(s.text)).parent as ts.CallExpression).arguments[0]?.getText()
 
         return {
             name: methodDeclaration.name.getText(),
             type: type as "Get" | "Post" | "Patch" | "Delete",
-            url: urlPrefix.replace(/'/g, "") + "/" + methodDeclaration.name.getText(),
+            url: urlPrefix.replace(/'/g, "") + "/" + (path? path: ""),
             handledExceptions: decoratorNames,
             methodObject: methodDeclaration,
             filePath: methodDeclaration.getSourceFile().fileName

@@ -10,7 +10,13 @@ export class Endpoint {
     filePath: string;
 }
 
-export class FoundExpection {
+export class FoundException {
     name: string;
     throwNode: ts.Node;
+}
+
+export class ApiCall {
+    method: string;
+    url: string;
+    filePath: string;
 }

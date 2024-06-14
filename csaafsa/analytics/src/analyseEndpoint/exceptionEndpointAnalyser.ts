@@ -1,10 +1,10 @@
-import {Endpoint, FoundExpection} from "../extraction/model/endpoint";
+import {Endpoint, FoundException} from "../extraction/model/endpoint";
 import {ExceptionAnalysis} from "./mainEndpointAnalyser";
 import ts from "typescript";
 import fs from "fs";
 
 export type MethodOrConstructor = ts.MethodDeclaration | ts.ConstructorDeclaration
-const CONFIG_FILE_NAME = "config.json"
+export const CONFIG_FILE_NAME = "config.json"
 
 export class ExceptionEndpointAnalyser {
 
@@ -15,7 +15,7 @@ export class ExceptionEndpointAnalyser {
 
     seenMethods: Set<number> = new Set()
     seenExceptionsString: Set<string> = new Set()
-    seenExceptions: Set<FoundExpection> = new Set()
+    seenExceptions: Set<FoundException> = new Set()
 
     diagnostics: ts.Diagnostic[] = []
 

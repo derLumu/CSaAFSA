@@ -1,8 +1,9 @@
 {
+  "frontendPath": "D:/Java/werwolf-bot/digital-control-center/frontend/src",
   "mappedExceptions": [
     {
       "stringMatch": "prisma",
-      "ExceptionToHandle": "ApiBadGatewayResponse"
+      "ExceptionToHandle": "ApiBadGatewayException"
     }
   ]
 }
