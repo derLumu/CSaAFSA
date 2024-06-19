@@ -4,7 +4,7 @@
   "main": "src/index.js",
   "scripts": {
     "build": "tsc -p .",
-    "start": "node ../dist/analytics/src/index.js D:/Java/werwolf-bot/analytics-test/org/my-nest-app/src"
+    "start": "node ../dist/analytics/src/commandLine.js D:/Java/werwolf-bot/analytics-test/org/my-nest-app/src"
   },
   "dependencies": {
     "typescript": "^4.5.4"

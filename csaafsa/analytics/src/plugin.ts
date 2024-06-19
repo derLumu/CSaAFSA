@@ -5,6 +5,11 @@ function init(modules: { typescript: typeof import("typescript/lib/tsserverlibra
 
     function create(info: ts.server.PluginCreateInfo) {
 
+        // Diagnostic logging
+        info.project.projectService.logger.info(
+            `Creating Plugin Analytics`
+        );
+
         const configPath = info.config.configPath || "";
 
         // Diagnostic logging
