@@ -13,10 +13,10 @@ export class EndpointExtractor extends Extractor {
     private static extractEndpointFromClass(classDeclaration: ts.ClassDeclaration, checker: ts.TypeChecker): Endpoint[] | undefined {
         // look if there is a decorator with the name "Controller", otherwise the class is not a controller and undefined is returned
         const identifier = this.extractIdentifier(classDeclaration, checker)
-        if (!identifier.map((id) => id.escapedText).find((s) => s === "Controller")) { return undefined; }
+        if (!identifier.map((id) => id.getText()).find((s) => s === "Controller")) { return undefined; }
 
         // extract the path prefix from the controller
-        const apiTags = identifier.find((s) => s.escapedText === "Controller")
+        const apiTags = identifier.find((s) => s.getText() === "Controller")
         if (!apiTags) { return undefined; }
         const urlPrefix = (apiTags.parent as ts.CallExpression).arguments[0]?.getText()
 
@@ -28,11 +28,11 @@ export class EndpointExtractor extends Extractor {
     private static extractEndpointFromMethod(methodDeclaration: ts.MethodDeclaration, urlPrefix: string, checker: ts.TypeChecker): Endpoint | undefined {
         // get the type of the method
         const identifier = this.extractIdentifier(methodDeclaration, checker)
-        const type = identifier.map((id) => id.escapedText).find((s) => HTTP_METHODS.includes(s.toString()))
+        const type = identifier.map((id) => id.getText().split('.').pop()).find((s) => HTTP_METHODS.includes(s.toString()))
         if (!type) { return undefined; }
         // safe all other decorators
         const decoratorNames = identifier.map((id) => id.getText()).filter((s) => !HTTP_METHODS.includes(s) && s.endsWith("Response") && s.startsWith("Api")).map((s) => s.substring(3, s.length - 8))
-        const path = (identifier.find((s) => HTTP_METHODS.includes(s.text)).parent as ts.CallExpression).arguments[0]?.getText()
+        const path = (identifier.find((s) => HTTP_METHODS.includes(s.getText().split('.').pop())).parent as ts.CallExpression).arguments[0]?.getText()
 
         return {
             name: methodDeclaration.name.getText(),
@@ -44,10 +44,10 @@ export class EndpointExtractor extends Extractor {
         }
     }
 
-    private static extractIdentifier(declarations: ts.ClassDeclaration | ts.MethodDeclaration, checker: ts.TypeChecker): ts.Identifier[] {
+    private static extractIdentifier(declarations: ts.ClassDeclaration | ts.MethodDeclaration, checker: ts.TypeChecker): (ts.Identifier | ts.PropertyAccessExpression)[] {
        const classDecorators = declarations.modifiers.filter((mod) => mod.kind === ts.SyntaxKind.Decorator) as ts.Decorator[];
        const callExpressions = classDecorators.filter((dec) => dec.expression.kind === ts.SyntaxKind.CallExpression).map((dec) => dec.expression) as ts.CallExpression[];
-       return callExpressions.filter((exp) => exp.expression.kind === ts.SyntaxKind.Identifier).map((exp) => exp.expression) as ts.Identifier[];
+       return callExpressions.filter((exp) => exp.expression.kind === ts.SyntaxKind.Identifier || exp.expression.kind === ts.SyntaxKind.PropertyAccessExpression).map((exp) => exp.expression) as (ts.Identifier | ts.PropertyAccessExpression)[];
     }
 
 

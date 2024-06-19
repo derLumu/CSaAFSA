@@ -41,6 +41,15 @@ export class ExceptionEndpointAnalyser {
                     code: 779,
                     source: 'EndpointAnalyser'
                 })
+                this.diagnostics.push({
+                    file: endpoint.methodObject.getSourceFile(),
+                    start: endpoint.methodObject.name.getStart(),
+                    length: (endpoint.methodObject.name.getEnd() - endpoint.methodObject.name.getStart())? (endpoint.methodObject.name.getEnd() - endpoint.methodObject.name.getStart()) : 10,
+                    messageText: `Exception "${exception.name}" is not documented in this endpoint!`,
+                    category: ts.DiagnosticCategory.Warning,
+                    code: 779,
+                    source: 'EndpointAnalyser',
+                })
             }
         })
         return {
