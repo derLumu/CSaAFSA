@@ -5,6 +5,13 @@ function init(modules: { typescript: typeof import("typescript/lib/tsserverlibra
 
     function create(info: ts.server.PluginCreateInfo) {
 
+        const configPath = info.config.configPath || "";
+
+        // Diagnostic logging
+        info.project.projectService.logger.info(
+            `Using config path ${configPath}`
+        );
+
         const proxy: ts.LanguageService = Object.create(null);
         for (let k of Object.keys(info.languageService) as Array<keyof ts.LanguageService>) {
             const x = info.languageService[k]!;
@@ -18,7 +25,7 @@ function init(modules: { typescript: typeof import("typescript/lib/tsserverlibra
                 return prior;
             }
 
-            const diagnostics = analyseDynamic(filename, info.languageService.getProgram()?.getRootFileNames() as string[])
+            const diagnostics = analyseDynamic(configPath, info.languageService.getProgram()?.getRootFileNames() as string[])
                 .filter(d => d.file.fileName === filename);
 
             return prior.concat(diagnostics);

@@ -10,16 +10,25 @@ import fs from "fs";
 import {ApiCall} from "./extraction/model/endpoint";
 import {CONFIG_FILE_NAME} from "./analyseEndpoint/exceptionEndpointAnalyser";
 
-export function analyseStatic(inputBE: string, inputFE: string): void {
+export function analyseStatic(inputBE: string): void {
     consola.start("Starting analysis")
 
-    let frontendFiles = walkSync(inputFE)
-    frontendFiles = frontendFiles.map((f) => f.replace(/\\/g, "/"))
-    const programFE = ts.createProgram(frontendFiles, {});
-    const checkerFE = programFE.getTypeChecker();
+    let apiCalls: ApiCall[] = []
+    try {
+        const configFile = fs.readFileSync("./src/" + CONFIG_FILE_NAME, 'utf-8');
+        const config = JSON.parse(configFile)
+        if (config.frontendPath) {
+            let frontendFiles = walkSync(config.frontendPath)
+            frontendFiles = frontendFiles.map((f) => f.replace(/\\/g, "/"))
+            const programFE = ts.createProgram(frontendFiles, {});
+            const checkerFE = programFE.getTypeChecker();
 
-    const apiCallExtractor = new ApiCallExtractor()
-    const apiCalls = apiCallExtractor.extractApiCalls(programFE, frontendFiles, checkerFE)
+            const apiCallExtractor = new ApiCallExtractor()
+            apiCalls = apiCallExtractor.extractApiCalls(programFE, frontendFiles, checkerFE)
+        }
+    } catch (e) {
+        consola.warn("Could not read the config file. Skipping frontend analysis.")
+    }
 
     let backendFiles = walkSync(inputBE)
     backendFiles = backendFiles.map((f) => f.replace(/\\/g, "/"))
@@ -49,22 +58,22 @@ export function analyseStatic(inputBE: string, inputFE: string): void {
     consola.success("Endpoint analysis done. We are done!");
 }
 
-export function analyseDynamic(input: string, projectFiles: string[] = []): ts.Diagnostic[] {
+export function analyseDynamic(configPath: string, projectFiles: string[] = []): ts.Diagnostic[] {
     let apiCalls: ApiCall[] = []
-    if (1 == 1) {
-        //TODO: find a way to read the config file
-        const configFile = fs.readFileSync("D:/Java/CSaAFSA/csaafsa/dist/analytics/src/config.json", 'utf-8');
+    try {
+        const configFile = fs.readFileSync(configPath, 'utf-8');
         const config = JSON.parse(configFile)
-        if (!config.frontendPath) {
-            return
-        }
-        let frontendFiles = walkSync(config.frontendPath)
-        frontendFiles = frontendFiles.map((f) => f.replace(/\\/g, "/"))
-        const programFE = ts.createProgram(frontendFiles, {});
-        const checkerFE = programFE.getTypeChecker();
+        if (config.frontendPath) {
+            let frontendFiles = walkSync(config.frontendPath)
+            frontendFiles = frontendFiles.map((f) => f.replace(/\\/g, "/"))
+            const programFE = ts.createProgram(frontendFiles, {});
+            const checkerFE = programFE.getTypeChecker();
 
-        const apiCallExtractor = new ApiCallExtractor()
-        apiCalls = apiCallExtractor.extractApiCalls(programFE, frontendFiles, checkerFE)
+            const apiCallExtractor = new ApiCallExtractor()
+            apiCalls = apiCallExtractor.extractApiCalls(programFE, frontendFiles, checkerFE)
+        }
+    } catch (e) {
+
     }
 
     projectFiles = projectFiles.map((f) => f.replace(/\\/g, "/"))

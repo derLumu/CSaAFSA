@@ -4,7 +4,7 @@ import ts from "typescript";
 import fs from "fs";
 
 export type MethodOrConstructor = ts.MethodDeclaration | ts.ConstructorDeclaration
-export const CONFIG_FILE_NAME = "config.json"
+export const CONFIG_FILE_NAME = "analytics.config.json"
 
 export class ExceptionEndpointAnalyser {
 
