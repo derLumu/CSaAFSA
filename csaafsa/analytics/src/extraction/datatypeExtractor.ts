@@ -6,14 +6,16 @@ export class DatatypeExtractor extends Extractor {
 
     public static extractDatatypes(program: ts.Program, checker: ts.TypeChecker, projectFiles: string[]): Datatype[] {
         const sourceFiles = this.fileNamesToSourceFiles(program, projectFiles);
-        const classDeclarations = sourceFiles.flatMap((sourceFile) => this.classDeclarationsFromSourceFile(sourceFile)).filter((type) => type !== undefined) as ts.ClassDeclaration[];
+        const classDeclarations = sourceFiles.flatMap((sourceFile) => this.classDeclarationsFromSourceFile(sourceFile))
+            .filter((type) => type !== undefined) as (ts.ClassDeclaration | ts.InterfaceDeclaration)[];
         // extract datatype from classes
         return classDeclarations.map((declaration) => this.extractDatatypeFromClass(declaration as ts.ClassDeclaration, checker)).filter((type) => type !== undefined) as Datatype[];
     }
 
-    private static extractDatatypeFromClass(classDeclaration: ts.ClassDeclaration, checker: ts.TypeChecker): Datatype | undefined {
+    private static extractDatatypeFromClass(classDeclaration: ts.ClassDeclaration | ts.InterfaceDeclaration, checker: ts.TypeChecker): Datatype | undefined {
         // ignore classes with other declarations than properties. They do not represent datatypes, thus are not relevant here
-        if (classDeclaration.members.find((member) => member.kind !== ts.SyntaxKind.PropertyDeclaration)) { return undefined; }
+        if ((classDeclaration.members as ts.NodeArray<any>)
+            .find((member) => member.kind !== ts.SyntaxKind.PropertyDeclaration && member.kind !== ts.SyntaxKind.PropertySignature)) { return undefined; }
 
         // collect properties and decorators, then build datatype
         const properties = this.extractDatatypeProperty(classDeclaration, checker);
@@ -28,13 +30,14 @@ export class DatatypeExtractor extends Extractor {
         } as Datatype;
     }
 
-    private static extractDatatypeProperty(classDeclaration: ts.ClassDeclaration, checker: ts.TypeChecker): DatatypeProperty[] | undefined {
+    private static extractDatatypeProperty(classDeclaration: ts.ClassDeclaration | ts.InterfaceDeclaration, checker: ts.TypeChecker): DatatypeProperty[] | undefined {
         // filter for property declarations and build properties
-        const attributes: ts.PropertyDeclaration[] = classDeclaration.members.filter((member) => member.kind === ts.SyntaxKind.PropertyDeclaration) as ts.PropertyDeclaration[];
+        const attributes: (ts.PropertyDeclaration | ts.PropertySignature)[] = (classDeclaration.members as ts.NodeArray<any>)
+            .filter((member) => member.kind === ts.SyntaxKind.PropertyDeclaration || member.kind === ts.SyntaxKind.PropertySignature) as (ts.PropertyDeclaration | ts.PropertySignature)[];
         return attributes.map((attribute) => this.buildDatatypeProperty(attribute, checker));
     }
 
-    private static buildDatatypeProperty(attribute: ts.PropertyDeclaration, checker: ts.TypeChecker): DatatypeProperty {
+    private static buildDatatypeProperty(attribute: ts.PropertyDeclaration | ts.PropertySignature, checker: ts.TypeChecker): DatatypeProperty {
         return {
             name: (attribute.name as ts.Identifier).escapedText,
             nameObject: attribute.name as ts.Identifier,
@@ -43,7 +46,7 @@ export class DatatypeExtractor extends Extractor {
         } as DatatypeProperty;
     }
 
-    private static extractDecorators(declaration: ts.ClassDeclaration | ts.PropertyDeclaration): ts.Decorator[] {
+    private static extractDecorators(declaration: ts.ClassDeclaration | ts.PropertyDeclaration | ts.InterfaceDeclaration | ts.PropertySignature): ts.Decorator[] {
         // take class or property declaration and access decorators
         if (!declaration.modifiers) { return []; }
         return declaration.modifiers.filter((modifier) => modifier.kind === ts.SyntaxKind.Decorator) as ts.Decorator[];

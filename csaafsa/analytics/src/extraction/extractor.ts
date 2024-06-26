@@ -9,13 +9,13 @@ export class Extractor {
         return projectFiles.map((file) => program.getSourceFile(file));
     }
 
-    public static classDeclarationsFromSourceFile(sourceFile: ts.SourceFile): ts.ClassDeclaration[] | undefined {
+    public static classDeclarationsFromSourceFile(sourceFile: ts.SourceFile): (ts.ClassDeclaration | ts.InterfaceDeclaration)[] | undefined {
         if (sourceFile.getChildCount() == 0) { return undefined; }
         // get syntax list of the source file
         const syntaxList = sourceFile.getChildAt(0);
         if (syntaxList.kind !== ts.SyntaxKind.SyntaxList) { return undefined; }
         // access the declarations and filter for class declarations
-        return syntaxList.getChildren().filter((child) => child.kind === ts.SyntaxKind.ClassDeclaration).filter((dek) => dek !== undefined) as ts.ClassDeclaration[];
+        return syntaxList.getChildren().filter((child) => child.kind === ts.SyntaxKind.ClassDeclaration || child.kind === ts.SyntaxKind.InterfaceDeclaration).filter((dek) => dek !== undefined) as (ts.ClassDeclaration | ts.InterfaceDeclaration)[];
     }
 
 }
