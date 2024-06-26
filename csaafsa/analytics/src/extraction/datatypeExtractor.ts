@@ -48,4 +48,17 @@ export class DatatypeExtractor extends Extractor {
         if (!declaration.modifiers) { return []; }
         return declaration.modifiers.filter((modifier) => modifier.kind === ts.SyntaxKind.Decorator) as ts.Decorator[];
     }
+
+    public static getParentClassFromPosition(position: number, file: ts.SourceFile): ts.ClassDeclaration | ts.InterfaceDeclaration | undefined {
+        let foundClass: ts.ClassDeclaration | ts.InterfaceDeclaration = undefined
+        file.forEachChild((node) => {
+            if (node.kind === ts.SyntaxKind.ClassDeclaration || node.kind === ts.SyntaxKind.InterfaceDeclaration) {
+                const classDeclaration = node as ts.ClassDeclaration | ts.InterfaceDeclaration;
+                if (classDeclaration.pos <= position && classDeclaration.end >= position) {
+                    foundClass = classDeclaration;
+                }
+            }
+        })
+        return foundClass;
+    }
 }
