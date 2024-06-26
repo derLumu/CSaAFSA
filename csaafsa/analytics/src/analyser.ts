@@ -10,26 +10,10 @@ import fs from "fs";
 import {ApiCall} from "./extraction/model/endpoint";
 import {CONFIG_FILE_NAME} from "./analyseEndpoint/exceptionEndpointAnalyser";
 
-export function analyseStatic(inputBE: string): void {
+export function analyser(inputBE: string): void {
     consola.start("Starting analysis")
 
-    let apiCalls: ApiCall[] = []
-    try {
-        const configFile = fs.readFileSync("./src/" + CONFIG_FILE_NAME, 'utf-8');
-        const config = JSON.parse(configFile)
-        if (config.frontendPath) {
-            let frontendFiles = walkSync(config.frontendPath)
-            frontendFiles = frontendFiles.map((f) => f.replace(/\\/g, "/"))
-            const programFE = ts.createProgram(frontendFiles, {});
-            const checkerFE = programFE.getTypeChecker();
-
-            const apiCallExtractor = new ApiCallExtractor()
-            apiCalls = apiCallExtractor.extractApiCalls(programFE, frontendFiles, checkerFE)
-        }
-    } catch (e) {
-        consola.warn("Could not read the config file. Skipping frontend analysis.")
-    }
-
+    const apiCalls = getApiCalls("./src/" + CONFIG_FILE_NAME, true)
     let backendFiles = walkSync(inputBE)
     backendFiles = backendFiles.map((f) => f.replace(/\\/g, "/"))
     const program = ts.createProgram(backendFiles, {});
@@ -44,38 +28,22 @@ export function analyseStatic(inputBE: string): void {
 
     // handle datatypes
     const datatypes = DatatypeExtractor.extractDatatypes(program, checker, backendFiles)
-    mainDatatypeAnalyser.analyseDatatypes(datatypes, "deep")
+    mainDatatypeAnalyser.analyseDatatypes(datatypes)
     mainDatatypeAnalyser.outputResults()
 
     consola.success("Datatype analysis done")
     consola.start("Starting endpoint analysis")
 
     // handle endpoints
-    const endpoints = EndpointExtractor.extractEndpoints(program, backendFiles, checker)
-    mainEndpointAnalyser.analyseEndpoints(endpoints, checker, backendFiles, apiCalls, "deep")
+    const endpoints = EndpointExtractor.extractEndpoints(program, backendFiles)
+    mainEndpointAnalyser.analyseEndpoints(endpoints, checker, backendFiles, apiCalls)
     mainEndpointAnalyser.outputResults()
 
     consola.success("Endpoint analysis done. We are done!");
 }
 
 export function analyseDynamic(configPath: string, projectFiles: string[] = []): ts.Diagnostic[] {
-    let apiCalls: ApiCall[] = []
-    try {
-        const configFile = fs.readFileSync(configPath, 'utf-8');
-        const config = JSON.parse(configFile)
-        if (config.frontendPath) {
-            let frontendFiles = walkSync(config.frontendPath)
-            frontendFiles = frontendFiles.map((f) => f.replace(/\\/g, "/"))
-            const programFE = ts.createProgram(frontendFiles, {});
-            const checkerFE = programFE.getTypeChecker();
-
-            const apiCallExtractor = new ApiCallExtractor()
-            apiCalls = apiCallExtractor.extractApiCalls(programFE, frontendFiles, checkerFE)
-        }
-    } catch (e) {
-
-    }
-
+    const apiCalls = getApiCalls(configPath, false)
     projectFiles = projectFiles.map((f) => f.replace(/\\/g, "/"))
     const program = ts.createProgram(projectFiles, {});
     const checker = program.getTypeChecker();
@@ -86,11 +54,29 @@ export function analyseDynamic(configPath: string, projectFiles: string[] = []):
 
     // handle datatypes
     const datatypes = DatatypeExtractor.extractDatatypes(program, checker, projectFiles)
-    let diagnostics: ts.Diagnostic[] = mainDatatypeAnalyser.analyseDatatypes(datatypes, "deep")
+    let diagnostics: ts.Diagnostic[] = mainDatatypeAnalyser.analyseDatatypes(datatypes)
 
     // handle endpoints
-    const endpoints = EndpointExtractor.extractEndpoints(program, projectFiles, checker)
-    diagnostics = diagnostics.concat(...mainEndpointAnalyser.analyseEndpoints(endpoints, checker, projectFiles, apiCalls, "deep"))
+    const endpoints = EndpointExtractor.extractEndpoints(program, projectFiles)
+    diagnostics = diagnostics.concat(...mainEndpointAnalyser.analyseEndpoints(endpoints, checker, projectFiles, apiCalls))
 
     return diagnostics
+}
+
+function getApiCalls(configPath: string, logging: boolean): ApiCall[] {
+    try {
+        const configFile = fs.readFileSync(configPath, 'utf-8');
+        const config = JSON.parse(configFile)
+        if (config.frontendPath) {
+            let frontendFiles = walkSync(config.frontendPath)
+            frontendFiles = frontendFiles.map((f) => f.replace(/\\/g, "/"))
+            const programFE = ts.createProgram(frontendFiles, {});
+            const checkerFE = programFE.getTypeChecker();
+
+            const apiCallExtractor = new ApiCallExtractor()
+            return apiCallExtractor.extractApiCalls(programFE, frontendFiles, checkerFE)
+        }
+    } catch (e) {
+        if (logging) { consola.warn("Could not read the config file. Skipping frontend analysis.") }
+    }
 }

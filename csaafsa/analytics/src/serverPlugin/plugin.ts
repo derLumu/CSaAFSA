@@ -3,6 +3,7 @@ import {getApplicableRefactors, UPDATE_DTO_REFACTOR_NAME} from "./applicableRefa
 import {getEditsForRefactor} from "./editsForRefactor";
 
 function init(modules: { typescript: typeof import("typescript/lib/tsserverlibrary") }) {
+    //@ts-ignore
     const ts = modules.typescript;
 
     function create(info: ts.server.PluginCreateInfo) {

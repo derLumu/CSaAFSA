@@ -6,7 +6,7 @@ export class TypeAliasExtractor extends Extractor{
 
     public static extractDatatypeFromAlias(alias: ts.TypeAliasDeclaration, checker: ts.TypeChecker): Datatype {
         const astProperties: ts.Symbol[] = checker.getTypeAtLocation(alias)?.getProperties()
-        const properties: DatatypeProperty[] = astProperties.map((property) => this.astPropertyToDatatypeProperty(property, checker));
+        const properties: DatatypeProperty[] = astProperties.map((property) => this.astPropertyToDatatypeProperty(property));
 
         return {
             name: alias.name.getText(),
@@ -17,7 +17,7 @@ export class TypeAliasExtractor extends Extractor{
         };
     }
 
-    private static astPropertyToDatatypeProperty(property: ts.Symbol, checker: ts.TypeChecker): DatatypeProperty {
+    private static astPropertyToDatatypeProperty(property: ts.Symbol): DatatypeProperty {
         return {
             name: property.name,
             typeId: (property as unknown as {id: number}).id,

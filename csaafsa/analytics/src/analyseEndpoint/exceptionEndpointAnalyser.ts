@@ -2,24 +2,19 @@ import {Endpoint, FoundException} from "../extraction/model/endpoint";
 import {ExceptionAnalysis} from "./mainEndpointAnalyser";
 import ts from "typescript";
 import fs from "fs";
+import {EndpointAnalyser} from "./endpointAnalyser";
 
 export type MethodOrConstructor = ts.MethodDeclaration | ts.ConstructorDeclaration
 export const CONFIG_FILE_NAME = "analytics.config.json"
 
-export class ExceptionEndpointAnalyser {
-
-    checker: ts.TypeChecker;
-    projectFiles: string[]
+export class ExceptionEndpointAnalyser extends EndpointAnalyser{
 
     mappedExceptions: { "stringMatch": string, "ExceptionToHandle": string }[]  = []
-
-    seenMethods: Set<number> = new Set()
-    seenExceptionsString: Set<string> = new Set()
     seenExceptions: Set<FoundException> = new Set()
-
     diagnostics: ts.Diagnostic[] = []
 
     constructor(checker: ts.TypeChecker, projectFiles: string[]) {
+        super()
         this.checker = checker;
         this.projectFiles = projectFiles;
     }
@@ -57,17 +52,6 @@ export class ExceptionEndpointAnalyser {
             exceptionsUnhandled: unhandledCounter,
             diagnostics: this.diagnostics
         }
-    }
-
-    recursiveMethodOrConstructor(method: MethodOrConstructor): void {
-        // check if the method was already seen or outside the selected files
-        if (!this.projectFiles.includes(method.getSourceFile().fileName)) {  return }
-        if (this.seenMethods.has((this.checker.getTypeAtLocation(method) as unknown as { id: number }).id)) { return }
-        this.seenMethods.add((this.checker.getTypeAtLocation(method) as unknown as { id: number }).id)
-
-        // traverse the method
-        const statements = method.body?.statements as ts.NodeArray<ts.Statement>
-        statements.forEach((statement) => this.recursiveNode(statement))
     }
 
     recursiveNode(node: ts.Node): void {

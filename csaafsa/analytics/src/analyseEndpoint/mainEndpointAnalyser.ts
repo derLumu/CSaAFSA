@@ -15,12 +15,12 @@ export class MainEndpointAnalyser {
     sumOfEndpoints: number = 0;
     sumOfEndpointsUniqueName: number = 0;
     sumOfEndpointsUniqueUrl: number = 0;
-    sumofUnusedEndpoints: number = 0;
+    sumOfUnusedEndpoints: number = 0;
     exceptionAnalysis: ExceptionAnalysis = { exceptionsThrown: 0, exceptionsUnhandled: 0, diagnostics: []}
 
     diagnostics: ts.Diagnostic[] = []
 
-    public analyseEndpoints(endpoints: Endpoint[], checker: ts.TypeChecker, projectFiles: string[], apiCalls: ApiCall[], mode: 'fast' | 'deep'): ts.Diagnostic[] {
+    public analyseEndpoints(endpoints: Endpoint[], checker: ts.TypeChecker, projectFiles: string[], apiCalls: ApiCall[]): ts.Diagnostic[] {
         // start analysis
         this.sumOfEndpoints = endpoints.length
         this.checkEndpointsUniqueNameAndUrl(endpoints)
@@ -29,7 +29,7 @@ export class MainEndpointAnalyser {
         endpoints = this.extractNestedHandledExceptions(endpoints, checker, projectFiles)
         this.exceptionAnalysis = this.analyseExceptionHandling(endpoints, checker, projectFiles)
         // only analyse FE if there are calls to analyse
-        apiCalls.length > 0 && (this.sumofUnusedEndpoints = this.getSumOfUnusedEndpoints(endpoints, apiCalls))
+        apiCalls.length > 0 && (this.sumOfUnusedEndpoints = this.getSumOfUnusedEndpoints(endpoints, apiCalls))
         return [...this.diagnostics, ...this.exceptionAnalysis.diagnostics]
     }
 
@@ -95,8 +95,8 @@ export class MainEndpointAnalyser {
             + ` - I found this many Endpoints with the same url: ${this.sumOfEndpoints - this.sumOfEndpointsUniqueUrl}\n`
             + ` - That is the percentage of unique url endpoints: ${(this.sumOfEndpointsUniqueUrl / this.sumOfEndpoints * 100).toFixed(2)}%\n\n`
 
-            + ` - Looking at your Frontend you have this many unused Endpoints: ${this.sumofUnusedEndpoints}\n`
-            + ` - That is the percentage of used endpoints: ${((this.sumOfEndpoints - this.sumofUnusedEndpoints) / this.sumOfEndpoints * 100).toFixed(2)}%\n\n`
+            + ` - Looking at your Frontend you have this many unused Endpoints: ${this.sumOfUnusedEndpoints}\n`
+            + ` - That is the percentage of used endpoints: ${((this.sumOfEndpoints - this.sumOfUnusedEndpoints) / this.sumOfEndpoints * 100).toFixed(2)}%\n\n`
 
             + ` - You have thrown this many Exceptions: ${this.exceptionAnalysis.exceptionsThrown}\n`
             + ` - And this is the Number of handled Exceptions: ${this.exceptionAnalysis.exceptionsThrown - this.exceptionAnalysis.exceptionsUnhandled}\n`

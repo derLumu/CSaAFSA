@@ -13,7 +13,7 @@ export class MainDatatypeAnalyser {
 
     diagnostics: ts.Diagnostic[] = []
 
-    public analyseDatatypes(datatypes: Datatype[], mode: 'fast' | 'deep'): ts.Diagnostic[] {
+    public analyseDatatypes(datatypes: Datatype[]): ts.Diagnostic[] {
         // start analysis
         this.sumOfDatatypesAll = datatypes.length
         this.checkDatatypesUniqueName(datatypes)

@@ -1,18 +1,14 @@
 import {Endpoint} from "../extraction/model/endpoint";
 import ts, {CallExpression, MethodDeclaration} from "typescript";
 import {HTTP_METHODS} from "../extraction/extractor";
+import {EndpointAnalyser} from "./endpointAnalyser";
 
 type MethodOrConstructor = ts.MethodDeclaration | ts.ConstructorDeclaration
 
-export class HandledExceptionEndpointAnalyser {
-
-    checker: ts.TypeChecker;
-    projectFiles: string[]
-
-    seenMethods: Set<number> = new Set()
-    seenExceptionsString: Set<string> = new Set()
+export class HandledExceptionEndpointAnalyser extends EndpointAnalyser {
 
     constructor(checker: ts.TypeChecker, projectFiles: string[]) {
+        super()
         this.checker = checker;
         this.projectFiles = projectFiles;
     }
@@ -23,17 +19,6 @@ export class HandledExceptionEndpointAnalyser {
         decoratorCalls.forEach((dec) => this.recursiveMethodOrConstructor(dec))
         endpoint.handledExceptions = endpoint.handledExceptions.concat(Array.from(this.seenExceptionsString))
         return endpoint
-    }
-
-    recursiveMethodOrConstructor(method: MethodOrConstructor): void {
-        // check if the method was already seen or outside the selected files
-        if (!this.projectFiles.includes(method.getSourceFile().fileName)) {  return }
-        if (this.seenMethods.has((this.checker.getTypeAtLocation(method) as unknown as { id: number }).id)) { return }
-        this.seenMethods.add((this.checker.getTypeAtLocation(method) as unknown as { id: number }).id)
-
-        // traverse the method
-        const statements = method.body?.statements as ts.NodeArray<ts.Statement>
-        statements?.forEach((statement) => this.recursiveNode(statement))
     }
 
     recursiveNode(node: ts.Node): void {
