@@ -8,7 +8,7 @@ export function getEditsForRefactor(positionOrRange: ts.TextRange | number, sour
     const newEdit: ts.FileTextChanges = {
         fileName: fileName,
         textChanges: [{
-            newText: `\n\nexport type Create${className} = Partial<${className}>`,
+            newText: `\n\nexport type Update${className} = Partial<${className}>`,
             span: {
                 start: classOfCaller.end,
                 length: 0,

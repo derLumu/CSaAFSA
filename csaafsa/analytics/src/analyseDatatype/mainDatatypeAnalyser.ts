@@ -47,11 +47,21 @@ export class MainDatatypeAnalyser {
                 if (this.arrayCompare(propertiesI, propertiesJ)) {
                     const t_i = datatypes[i]
                     const t_j = datatypes[j]
+                    if (t_i.name == "Update" + t_j.name || t_j.name == "Update" + t_i.name) { continue }
                     this.diagnostics.push({
                         file: t_i.nameObject.getSourceFile(),
                         start: t_i.nameObject.getStart(),
                         length: (t_i.nameObject.getEnd() - t_i.nameObject.getStart())? (t_i.nameObject.getEnd() - t_i.nameObject.getStart()) : 10,
                         messageText: `Datatype content is not Unique! Found in:\n- ${t_i.path}\n- ${t_j.path}`,
+                        category: ts.DiagnosticCategory.Warning,
+                        code: 777,
+                        source: 'DatatypeAnalyser'
+                    })
+                    this.diagnostics.push({
+                        file: t_j.nameObject.getSourceFile(),
+                        start: t_j.nameObject.getStart(),
+                        length: (t_j.nameObject.getEnd() - t_j.nameObject.getStart())? (t_j.nameObject.getEnd() - t_j.nameObject.getStart()) : 10,
+                        messageText: `Datatype content is not Unique! Found in:\n- ${t_j.path}\n- ${t_i.path}`,
                         category: ts.DiagnosticCategory.Warning,
                         code: 777,
                         source: 'DatatypeAnalyser'
