@@ -1,6 +1,7 @@
 import {Datatype, DatatypeProperty} from "./model/datatype";
 import ts from "typescript";
 import {Extractor} from "./extractor";
+import {TypeAliasExtractor} from "./typeAliasExtractor";
 
 export class DatatypeExtractor extends Extractor {
 
@@ -8,8 +9,12 @@ export class DatatypeExtractor extends Extractor {
         const sourceFiles = this.fileNamesToSourceFiles(program, projectFiles);
         const classDeclarations = sourceFiles.flatMap((sourceFile) => this.classDeclarationsFromSourceFile(sourceFile))
             .filter((type) => type !== undefined) as (ts.ClassDeclaration | ts.InterfaceDeclaration)[];
+        const typeAlias = sourceFiles.flatMap((sourceFile) => this.typeAliasDeclarationsFromSourceFile(sourceFile))
+            .filter((type) => type !== undefined) as (ts.TypeAliasDeclaration)[];
+
         // extract datatype from classes
-        return classDeclarations.map((declaration) => this.extractDatatypeFromClass(declaration as ts.ClassDeclaration, checker)).filter((type) => type !== undefined) as Datatype[];
+        return [...classDeclarations.map((declaration) => this.extractDatatypeFromClass(declaration as ts.ClassDeclaration, checker)).filter((type) => type !== undefined) as Datatype[],
+                ...typeAlias.map((alias) => TypeAliasExtractor.extractDatatypeFromAlias(alias, checker)).filter((type) => type !== undefined) as Datatype[]];
     }
 
     private static extractDatatypeFromClass(classDeclaration: ts.ClassDeclaration | ts.InterfaceDeclaration, checker: ts.TypeChecker): Datatype | undefined {
@@ -40,16 +45,9 @@ export class DatatypeExtractor extends Extractor {
     private static buildDatatypeProperty(attribute: ts.PropertyDeclaration | ts.PropertySignature, checker: ts.TypeChecker): DatatypeProperty {
         return {
             name: (attribute.name as ts.Identifier).escapedText,
-            nameObject: attribute.name as ts.Identifier,
             typeId: (checker.getTypeAtLocation(attribute.type) as unknown as {id: number}).id as number,
             decorators: this.extractDecorators(attribute)
         } as DatatypeProperty;
-    }
-
-    private static extractDecorators(declaration: ts.ClassDeclaration | ts.PropertyDeclaration | ts.InterfaceDeclaration | ts.PropertySignature): ts.Decorator[] {
-        // take class or property declaration and access decorators
-        if (!declaration.modifiers) { return []; }
-        return declaration.modifiers.filter((modifier) => modifier.kind === ts.SyntaxKind.Decorator) as ts.Decorator[];
     }
 
     public static getParentClassFromPosition(position: number, file: ts.SourceFile): ts.ClassDeclaration | ts.InterfaceDeclaration | undefined {

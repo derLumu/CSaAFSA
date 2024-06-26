@@ -11,7 +11,6 @@ export class Datatype {
 
 export class DatatypeProperty {
     public name: string;
-    public nameObject: ts.Identifier;
     public typeId: number;
     public decorators: ts.Decorator[];
 }
