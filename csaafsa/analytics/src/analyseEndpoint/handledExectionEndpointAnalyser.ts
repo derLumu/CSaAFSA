@@ -22,9 +22,9 @@ export class HandledExceptionEndpointAnalyser extends EndpointAnalyser {
     }
 
     recursiveNode(node: ts.Node): void {
-        if (node.kind == ts.SyntaxKind.Identifier) {
-            if (!HTTP_METHODS.includes(node.getText()) && node.getText().endsWith("Response") && node.getText().startsWith("Api")) {
-                this.seenExceptionsString.add(node.getText().substring(3, node.getText().length - 8))
+        if (node.kind == ts.SyntaxKind.CallExpression) {
+            if (!HTTP_METHODS.includes(node.getText()) && node.getText().startsWith("TypedException<")) {
+                this.seenExceptionsString.add(node.getText().split('<')?.pop()?.split('>')?.shift())
             }
         }
 
