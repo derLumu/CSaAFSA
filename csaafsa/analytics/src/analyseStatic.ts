@@ -10,7 +10,7 @@ import fs from "fs";
 import {ApiCall} from "./extraction/model/endpoint";
 import {CONFIG_FILE_NAME} from "./analyseEndpoint/exceptionEndpointAnalyser";
 
-export function analyser(inputBE: string): void {
+export function analyseStatic(inputBE: string): void {
     consola.start("Starting analysis")
 
     const apiCalls = getApiCalls("./src/" + CONFIG_FILE_NAME, true)
@@ -79,4 +79,5 @@ function getApiCalls(configPath: string, logging: boolean): ApiCall[] {
     } catch (e) {
         if (logging) { consola.warn("Could not read the config file. Skipping frontend analysis.") }
     }
+    return []
 }

@@ -31,14 +31,17 @@ export class EndpointExtractor extends Extractor {
         const type = identifier.map((id) => id.getText().split('.').pop()).find((s) => HTTP_METHODS.includes(s.toString()))
         if (!type) { return undefined; }
         // safe all other decorators
-        const decoratorNames = identifier.map((id) => id.getText()).filter((s) => !HTTP_METHODS.includes(s) && s.endsWith("Response") && s.startsWith("Api")).map((s) => s.substring(3, s.length - 8))
+        const decorators = methodDeclaration.modifiers.filter((mod) => mod.kind === ts.SyntaxKind.Decorator) as ts.Decorator[];
+        const handledExceptions = decorators.map(d => d.getText()).filter((s) => !HTTP_METHODS.includes(s) && s.startsWith("@TypedException<")).map((s) => s.split('<').pop().split('>').shift())
         const path = (identifier.find((s) => HTTP_METHODS.includes(s.getText().split('.').pop())).parent as ts.CallExpression).arguments[0]?.getText()
+
+        console.log(handledExceptions)
 
         return {
             name: methodDeclaration.name.getText(),
             type: type as "Get" | "Post" | "Patch" | "Delete",
             url: urlPrefix.replace(/'/g, "") + "/" + (path? path: ""),
-            handledExceptions: decoratorNames,
+            handledExceptions: handledExceptions,
             methodObject: methodDeclaration,
             filePath: methodDeclaration.getSourceFile().fileName
         }

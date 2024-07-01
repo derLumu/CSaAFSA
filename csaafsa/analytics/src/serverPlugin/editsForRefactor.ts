@@ -1,11 +1,13 @@
 import {DatatypeExtractor} from "../extraction/datatypeExtractor";
 
 export function getEditsForRefactor(positionOrRange: ts.TextRange | number, sourceFile: ts.SourceFile, fileName: string): ts.RefactorEditInfo {
+    const newEdits = []
+    // dto generation
     const position = typeof positionOrRange === "number" ? positionOrRange : positionOrRange.pos;
     const classOfCaller = DatatypeExtractor.getParentClassFromPosition(position, sourceFile);
     if (!classOfCaller) { return { edits: [] } }
     const className = classOfCaller?.name.escapedText;
-    const newEdit: ts.FileTextChanges = {
+    newEdits.push({
         fileName: fileName,
         textChanges: [{
             newText: `\n\nexport type Update${className} = Partial<${className}>`,
@@ -14,6 +16,10 @@ export function getEditsForRefactor(positionOrRange: ts.TextRange | number, sour
                 length: 0,
             }
         }]
-    }
-    return { edits: [newEdit] };
+    })
+
+    // exception updates
+    //TODO: add exception updates
+
+    return { edits: newEdits };
 }
