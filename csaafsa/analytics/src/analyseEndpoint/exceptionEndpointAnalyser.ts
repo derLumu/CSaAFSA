@@ -20,7 +20,6 @@ export class ExceptionEndpointAnalyser extends EndpointAnalyser{
     }
 
     analyseEndpoint(endpoint: Endpoint): ExceptionAnalysis {
-        console.log("Analyse endpoint: " + endpoint.name)
         this.loadMappedExceptions()
         this.recursiveMethodOrConstructor(endpoint.methodObject)
         let unhandledCounter = 0;
@@ -49,14 +48,13 @@ export class ExceptionEndpointAnalyser extends EndpointAnalyser{
             }
         })
         return {
-            exceptionsThrown: this.seenExceptions.size,
+            exceptionsThrown: Array.from(this.seenExceptions),
             exceptionsUnhandled: unhandledCounter,
             diagnostics: this.diagnostics
         }
     }
 
     recursiveNode(node: ts.Node): void {
-        console.log("Analyse node: " + node.getText())
         // check if the node is a throw statement -> get the exception
         if (node.kind === ts.SyntaxKind.ThrowStatement) {
             const exception = (node as ts.ThrowStatement).expression as ts.NewExpression

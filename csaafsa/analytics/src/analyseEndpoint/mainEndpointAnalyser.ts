@@ -1,11 +1,11 @@
-import {ApiCall, Endpoint} from "../extraction/model/endpoint";
+import {ApiCall, Endpoint, FoundException} from "../extraction/model/endpoint";
 import {ExceptionEndpointAnalyser} from "./exceptionEndpointAnalyser";
 import ts from "typescript";
 import {consola} from "consola";
 import {HandledExceptionEndpointAnalyser} from "./handledExectionEndpointAnalyser";
 
 export class ExceptionAnalysis {
-    exceptionsThrown: number = 0;
+    exceptionsThrown: FoundException[] = [];
     exceptionsUnhandled: number = 0;
     diagnostics: ts.Diagnostic[] = []
 }
@@ -16,7 +16,7 @@ export class MainEndpointAnalyser {
     sumOfEndpointsUniqueName: number = 0;
     sumOfEndpointsUniqueUrl: number = 0;
     sumOfUnusedEndpoints: number = 0;
-    exceptionAnalysis: ExceptionAnalysis = { exceptionsThrown: 0, exceptionsUnhandled: 0, diagnostics: []}
+    exceptionAnalysis: ExceptionAnalysis = { exceptionsThrown: [], exceptionsUnhandled: 0, diagnostics: []}
 
     diagnostics: ts.Diagnostic[] = []
 
@@ -76,7 +76,7 @@ export class MainEndpointAnalyser {
     private analyseExceptionHandling(endpoints: Endpoint[], checker: ts.TypeChecker, projectFiles: string[]): ExceptionAnalysis {
         const exceptionAnalysis = endpoints.map((endpoint) => new ExceptionEndpointAnalyser(checker, projectFiles).analyseEndpoint(endpoint))
         return {
-            exceptionsThrown: exceptionAnalysis.map((a) => a.exceptionsThrown).reduce((sum, current) => sum + current, 0),
+            exceptionsThrown: exceptionAnalysis.map((a) => a.exceptionsThrown).reduce((sum, current) => sum.concat(current), []),
             exceptionsUnhandled: exceptionAnalysis.map((a) => a.exceptionsUnhandled).reduce((sum, current) => sum + current, 0),
             diagnostics: exceptionAnalysis.map((a) => a.diagnostics).reduce((sum, current) => sum.concat(current), [])
         }
@@ -99,8 +99,8 @@ export class MainEndpointAnalyser {
             + ` - That is the percentage of used endpoints: ${((this.sumOfEndpoints - this.sumOfUnusedEndpoints) / this.sumOfEndpoints * 100).toFixed(2)}%\n\n`
 
             + ` - You have thrown this many Exceptions: ${this.exceptionAnalysis.exceptionsThrown}\n`
-            + ` - And this is the Number of handled Exceptions: ${this.exceptionAnalysis.exceptionsThrown - this.exceptionAnalysis.exceptionsUnhandled}\n`
-            + ` - That is the percentage of handled exceptions: ${((this.exceptionAnalysis.exceptionsThrown - this.exceptionAnalysis.exceptionsUnhandled) / this.exceptionAnalysis.exceptionsThrown * 100).toFixed(2)}%\n`
+            + ` - And this is the Number of handled Exceptions: ${this.exceptionAnalysis.exceptionsThrown.length - this.exceptionAnalysis.exceptionsUnhandled}\n`
+            + ` - That is the percentage of handled exceptions: ${((this.exceptionAnalysis.exceptionsThrown.length - this.exceptionAnalysis.exceptionsUnhandled) / this.exceptionAnalysis.exceptionsThrown.length * 100).toFixed(2)}%\n`
         )
     }
 
