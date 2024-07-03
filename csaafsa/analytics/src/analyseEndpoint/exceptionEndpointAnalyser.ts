@@ -13,19 +13,20 @@ export class ExceptionEndpointAnalyser extends EndpointAnalyser{
     seenExceptions: Set<FoundException> = new Set()
     diagnostics: ts.Diagnostic[] = []
 
-    constructor(checker: ts.TypeChecker, projectFiles: string[]) {
+    constructor(checker: ts.TypeChecker) {
         super()
         this.checker = checker;
-        this.projectFiles = projectFiles;
     }
 
     analyseEndpoint(endpoint: Endpoint): ExceptionAnalysis {
         this.loadMappedExceptions()
         this.recursiveMethodOrConstructor(endpoint.methodObject)
         let unhandledCounter = 0;
+        const unhandled = []
         this.seenExceptions.forEach((exception) => {
             if (!endpoint.handledExceptions.find(e => exception.name.includes(e))) {
                 unhandledCounter++;
+                unhandled.push(exception)
                 //TODO: remind the throw object or file path of it to display it here
                 this.diagnostics.push({
                     file: exception.throwNode.getSourceFile(),
@@ -49,7 +50,8 @@ export class ExceptionEndpointAnalyser extends EndpointAnalyser{
         })
         return {
             exceptionsThrown: Array.from(this.seenExceptions),
-            exceptionsUnhandled: unhandledCounter,
+            exceptionsUnhandled: unhandled,
+            exceptionsUnhandledCount: unhandledCounter,
             diagnostics: this.diagnostics
         }
     }

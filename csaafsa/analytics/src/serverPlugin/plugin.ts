@@ -1,6 +1,6 @@
 import {getSemanticDiagnostics} from "./semanticDiagnostics";
-import {getApplicableRefactors, UPDATE_DTO_REFACTOR_NAME} from "./applicableRefactors";
-import {getEditsForRefactor} from "./editsForRefactor";
+import {EXCEPTIONS_REFACTOR_NAME, getApplicableRefactors, UPDATE_DTO_REFACTOR_NAME} from "./applicableRefactors";
+import {getEditsForDTORefactor, getEditsForExceptionRefactor} from "./editsForRefactor";
 
 function init(modules: { typescript: typeof import("typescript/lib/tsserverlibrary") }) {
     //@ts-ignore
@@ -31,8 +31,10 @@ function init(modules: { typescript: typeof import("typescript/lib/tsserverlibra
         }
         proxy.getEditsForRefactor = (fileName, formatOptions, positionOrRange, refactorName, actionName, preferences) => {
             return refactorName == UPDATE_DTO_REFACTOR_NAME
-                ? getEditsForRefactor(positionOrRange, info.languageService.getProgram()?.getSourceFile(fileName)!, fileName)
-                : info.languageService.getEditsForRefactor(fileName, formatOptions, positionOrRange, refactorName, actionName, preferences);
+                ? getEditsForDTORefactor(positionOrRange, info.languageService.getProgram()?.getSourceFile(fileName)!, fileName)
+                : refactorName == EXCEPTIONS_REFACTOR_NAME?
+                    getEditsForExceptionRefactor(positionOrRange, info.languageService.getProgram()?.getSourceFile(fileName)!, fileName)
+                    : info.languageService.getEditsForRefactor(fileName, formatOptions, positionOrRange, refactorName, actionName, preferences);
         }
         return proxy;
     }

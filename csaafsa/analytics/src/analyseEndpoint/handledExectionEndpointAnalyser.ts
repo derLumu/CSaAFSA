@@ -10,7 +10,6 @@ export class HandledExceptionEndpointAnalyser extends EndpointAnalyser {
     constructor(checker: ts.TypeChecker, projectFiles: string[]) {
         super()
         this.checker = checker;
-        this.projectFiles = projectFiles;
     }
 
     analyseEndpoint(endpoint: Endpoint): Endpoint {

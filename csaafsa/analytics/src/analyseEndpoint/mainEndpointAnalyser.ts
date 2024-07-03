@@ -6,7 +6,8 @@ import {HandledExceptionEndpointAnalyser} from "./handledExectionEndpointAnalyse
 
 export class ExceptionAnalysis {
     exceptionsThrown: FoundException[] = [];
-    exceptionsUnhandled: number = 0;
+    exceptionsUnhandled: FoundException[] = [];
+    exceptionsUnhandledCount: number = 0;
     diagnostics: ts.Diagnostic[] = []
 }
 
@@ -16,7 +17,7 @@ export class MainEndpointAnalyser {
     sumOfEndpointsUniqueName: number = 0;
     sumOfEndpointsUniqueUrl: number = 0;
     sumOfUnusedEndpoints: number = 0;
-    exceptionAnalysis: ExceptionAnalysis = { exceptionsThrown: [], exceptionsUnhandled: 0, diagnostics: []}
+    exceptionAnalysis: ExceptionAnalysis = { exceptionsThrown: [], exceptionsUnhandledCount: 0, exceptionsUnhandled: [], diagnostics: []}
 
     diagnostics: ts.Diagnostic[] = []
 
@@ -27,7 +28,7 @@ export class MainEndpointAnalyser {
         this.sumOfEndpointsUniqueName = this.getSumOfEndpointsUniqueName(endpoints)
         this.sumOfEndpointsUniqueUrl = this.getSumOfEndpointsUniqueUrl(endpoints)
         endpoints = this.extractNestedHandledExceptions(endpoints, checker, projectFiles)
-        this.exceptionAnalysis = this.analyseExceptionHandling(endpoints, checker, projectFiles)
+        this.exceptionAnalysis = this.analyseExceptionHandling(endpoints, checker)
         // only analyse FE if there are calls to analyse
         apiCalls.length > 0 && (this.sumOfUnusedEndpoints = this.getSumOfUnusedEndpoints(endpoints, apiCalls))
         return [...this.diagnostics, ...this.exceptionAnalysis.diagnostics]
@@ -73,11 +74,12 @@ export class MainEndpointAnalyser {
         return new Set(endpoints.map((endpoint) => endpoint.type + "," + endpoint.url)).size;
     }
 
-    private analyseExceptionHandling(endpoints: Endpoint[], checker: ts.TypeChecker, projectFiles: string[]): ExceptionAnalysis {
-        const exceptionAnalysis = endpoints.map((endpoint) => new ExceptionEndpointAnalyser(checker, projectFiles).analyseEndpoint(endpoint))
+    private analyseExceptionHandling(endpoints: Endpoint[], checker: ts.TypeChecker): ExceptionAnalysis {
+        const exceptionAnalysis = endpoints.map((endpoint) => new ExceptionEndpointAnalyser(checker).analyseEndpoint(endpoint))
         return {
             exceptionsThrown: exceptionAnalysis.map((a) => a.exceptionsThrown).reduce((sum, current) => sum.concat(current), []),
-            exceptionsUnhandled: exceptionAnalysis.map((a) => a.exceptionsUnhandled).reduce((sum, current) => sum + current, 0),
+            exceptionsUnhandled: exceptionAnalysis.map((a) => a.exceptionsUnhandled).reduce((sum, current) => sum.concat(current), []),
+            exceptionsUnhandledCount: exceptionAnalysis.map((a) => a.exceptionsUnhandledCount).reduce((sum, current) => sum + current, 0),
             diagnostics: exceptionAnalysis.map((a) => a.diagnostics).reduce((sum, current) => sum.concat(current), [])
         }
     }
@@ -99,8 +101,8 @@ export class MainEndpointAnalyser {
             + ` - That is the percentage of used endpoints: ${((this.sumOfEndpoints - this.sumOfUnusedEndpoints) / this.sumOfEndpoints * 100).toFixed(2)}%\n\n`
 
             + ` - You have thrown this many Exceptions: ${this.exceptionAnalysis.exceptionsThrown}\n`
-            + ` - And this is the Number of handled Exceptions: ${this.exceptionAnalysis.exceptionsThrown.length - this.exceptionAnalysis.exceptionsUnhandled}\n`
-            + ` - That is the percentage of handled exceptions: ${((this.exceptionAnalysis.exceptionsThrown.length - this.exceptionAnalysis.exceptionsUnhandled) / this.exceptionAnalysis.exceptionsThrown.length * 100).toFixed(2)}%\n`
+            + ` - And this is the Number of handled Exceptions: ${this.exceptionAnalysis.exceptionsThrown.length - this.exceptionAnalysis.exceptionsUnhandledCount}\n`
+            + ` - That is the percentage of handled exceptions: ${((this.exceptionAnalysis.exceptionsThrown.length - this.exceptionAnalysis.exceptionsUnhandledCount) / this.exceptionAnalysis.exceptionsThrown.length * 100).toFixed(2)}%\n`
         )
     }
 

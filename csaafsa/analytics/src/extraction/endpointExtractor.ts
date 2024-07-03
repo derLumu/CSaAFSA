@@ -1,6 +1,7 @@
 import ts from "typescript";
 import {Endpoint} from "./model/endpoint";
 import {Extractor, HTTP_METHODS} from "./extractor";
+import {EndpointWithPosition} from "../serverPlugin/exceptionRefactorCollector";
 
 export class EndpointExtractor extends Extractor {
 
@@ -51,6 +52,17 @@ export class EndpointExtractor extends Extractor {
        return callExpressions.filter((exp) => exp.expression.kind === ts.SyntaxKind.Identifier || exp.expression.kind === ts.SyntaxKind.PropertyAccessExpression).map((exp) => exp.expression) as (ts.Identifier | ts.PropertyAccessExpression)[];
     }
 
-
+    public static getParentEndpoint(parentClass: ts.ClassDeclaration, position: number): EndpointWithPosition | undefined {
+        let foundMethod: ts.MethodDeclaration = undefined
+        parentClass.forEachChild((node) => {
+            if (node.kind === ts.SyntaxKind.MethodDeclaration) {
+                const methodDeclaration = node as ts.MethodDeclaration;
+                if (methodDeclaration.pos <= position && methodDeclaration.end >= position) {
+                    foundMethod = methodDeclaration;
+                }
+            }
+        })
+        return { endpoint: this.extractEndpointFromMethod(foundMethod, ""), method: foundMethod };
+    }
 
 }
