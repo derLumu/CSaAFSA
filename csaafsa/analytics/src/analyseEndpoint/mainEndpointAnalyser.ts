@@ -100,7 +100,7 @@ export class MainEndpointAnalyser {
             + ` - Looking at your Frontend you have this many unused Endpoints: ${this.sumOfUnusedEndpoints}\n`
             + ` - That is the percentage of used endpoints: ${((this.sumOfEndpoints - this.sumOfUnusedEndpoints) / this.sumOfEndpoints * 100).toFixed(2)}%\n\n`
 
-            + ` - You have thrown this many Exceptions: ${this.exceptionAnalysis.exceptionsThrown}\n`
+            + ` - You have thrown this many Exceptions: ${this.exceptionAnalysis.exceptionsThrown.length}\n`
             + ` - And this is the Number of handled Exceptions: ${this.exceptionAnalysis.exceptionsThrown.length - this.exceptionAnalysis.exceptionsUnhandledCount}\n`
             + ` - That is the percentage of handled exceptions: ${((this.exceptionAnalysis.exceptionsThrown.length - this.exceptionAnalysis.exceptionsUnhandledCount) / this.exceptionAnalysis.exceptionsThrown.length * 100).toFixed(2)}%\n`
         )
