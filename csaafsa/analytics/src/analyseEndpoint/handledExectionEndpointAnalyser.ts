@@ -7,7 +7,7 @@ type MethodOrConstructor = ts.MethodDeclaration | ts.ConstructorDeclaration
 
 export class HandledExceptionEndpointAnalyser extends EndpointAnalyser {
 
-    constructor(checker: ts.TypeChecker, projectFiles: string[]) {
+    constructor(checker: ts.TypeChecker) {
         super()
         this.checker = checker;
     }

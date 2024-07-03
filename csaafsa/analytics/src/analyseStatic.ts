@@ -36,7 +36,7 @@ export function analyseStatic(inputBE: string): void {
 
     // handle endpoints
     const endpoints = EndpointExtractor.extractEndpoints(program, backendFiles)
-    mainEndpointAnalyser.analyseEndpoints(endpoints, checker, backendFiles, apiCalls)
+    mainEndpointAnalyser.analyseEndpoints(endpoints, checker, apiCalls)
     mainEndpointAnalyser.outputResults()
 
     consola.success("Endpoint analysis done. We are done!");
@@ -58,7 +58,7 @@ export function analyseDynamic(configPath: string, projectFiles: string[] = []):
 
     // handle endpoints
     const endpoints = EndpointExtractor.extractEndpoints(program, projectFiles)
-    diagnostics = diagnostics.concat(...mainEndpointAnalyser.analyseEndpoints(endpoints, checker, projectFiles, apiCalls))
+    diagnostics = diagnostics.concat(...mainEndpointAnalyser.analyseEndpoints(endpoints, checker, apiCalls))
 
     return diagnostics
 }

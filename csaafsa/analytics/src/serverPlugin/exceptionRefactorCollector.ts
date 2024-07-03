@@ -27,7 +27,7 @@ export class ExceptionRefactorCollector {
 
         const program = ts.createProgram([sourcefile.fileName], {});
         const checker = program.getTypeChecker();
-        const analysedEndpoint = new HandledExceptionEndpointAnalyser(checker, [sourcefile.fileName]).analyseEndpoint(endpoint.endpoint)
+        const analysedEndpoint = new HandledExceptionEndpointAnalyser(checker).analyseEndpoint(endpoint.endpoint)
         return { exception: new ExceptionEndpointAnalyser(checker).analyseEndpoint(analysedEndpoint).exceptionsUnhandled, method: endpoint.method}
     }
 

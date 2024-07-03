@@ -21,13 +21,13 @@ export class MainEndpointAnalyser {
 
     diagnostics: ts.Diagnostic[] = []
 
-    public analyseEndpoints(endpoints: Endpoint[], checker: ts.TypeChecker, projectFiles: string[], apiCalls: ApiCall[]): ts.Diagnostic[] {
+    public analyseEndpoints(endpoints: Endpoint[], checker: ts.TypeChecker, apiCalls: ApiCall[]): ts.Diagnostic[] {
         // start analysis
         this.sumOfEndpoints = endpoints.length
         this.checkEndpointsUniqueNameAndUrl(endpoints)
         this.sumOfEndpointsUniqueName = this.getSumOfEndpointsUniqueName(endpoints)
         this.sumOfEndpointsUniqueUrl = this.getSumOfEndpointsUniqueUrl(endpoints)
-        endpoints = this.extractNestedHandledExceptions(endpoints, checker, projectFiles)
+        endpoints = this.extractNestedHandledExceptions(endpoints, checker)
         this.exceptionAnalysis = this.analyseExceptionHandling(endpoints, checker)
         // only analyse FE if there are calls to analyse
         apiCalls.length > 0 && (this.sumOfUnusedEndpoints = this.getSumOfUnusedEndpoints(endpoints, apiCalls))
@@ -84,8 +84,8 @@ export class MainEndpointAnalyser {
         }
     }
 
-    private extractNestedHandledExceptions(endpoints: Endpoint[], checker: ts.TypeChecker, projectFiles: string[]): Endpoint[] {
-        return endpoints.map((endpoint) => new HandledExceptionEndpointAnalyser(checker, projectFiles).analyseEndpoint(endpoint))
+    private extractNestedHandledExceptions(endpoints: Endpoint[], checker: ts.TypeChecker): Endpoint[] {
+        return endpoints.map((endpoint) => new HandledExceptionEndpointAnalyser(checker).analyseEndpoint(endpoint))
     }
 
     public outputResults() {
