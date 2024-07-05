@@ -38,7 +38,7 @@ export class MainDatatypeAnalyser {
                         length: t.nameObject.getEnd() - t.nameObject.getStart(),
                         messageText: `Datatype name "${t.name}" is not unique!`,
                         category: ts.DiagnosticCategory.Warning,
-                        code: 777,
+                        code: 701,
                         source: 'DatatypeAnalyser'
                     })
                 }
@@ -54,7 +54,7 @@ export class MainDatatypeAnalyser {
                         length: (t_i.nameObject.getEnd() - t_i.nameObject.getStart())? (t_i.nameObject.getEnd() - t_i.nameObject.getStart()) : 10,
                         messageText: `Datatype content is not Unique! Found in:\n- ${t_i.path}\n- ${t_j.path}`,
                         category: ts.DiagnosticCategory.Warning,
-                        code: 777,
+                        code: 702,
                         source: 'DatatypeAnalyser'
                     })
                     this.diagnostics.push({
@@ -63,7 +63,7 @@ export class MainDatatypeAnalyser {
                         length: (t_j.nameObject.getEnd() - t_j.nameObject.getStart())? (t_j.nameObject.getEnd() - t_j.nameObject.getStart()) : 10,
                         messageText: `Datatype content is not Unique! Found in:\n- ${t_j.path}\n- ${t_i.path}`,
                         category: ts.DiagnosticCategory.Warning,
-                        code: 777,
+                        code: 702,
                         source: 'DatatypeAnalyser'
                     })
                 }

@@ -47,7 +47,7 @@ export class MainEndpointAnalyser {
                         length: (t.methodObject.name.getEnd() - t.methodObject.name.getStart()) ? (t.methodObject.name.getEnd() - t.methodObject.name.getStart()) : 10,
                         messageText: `Endpoint name "${t.name}" is not unique!`,
                         category: ts.DiagnosticCategory.Warning,
-                        code: 778,
+                        code: 705,
                         source: 'EndpointAnalyser'
                     })
                 }
@@ -59,7 +59,7 @@ export class MainEndpointAnalyser {
                         length: (t.methodObject.name.getEnd() - t.methodObject.name.getStart()) ? (t.methodObject.name.getEnd() - t.methodObject.name.getStart()) : 10,
                         messageText: `Endpoint url "${t.url}" is not unique! Found in:\n- ${t.filePath}\n- ${endpoints[j].filePath}`,
                         category: ts.DiagnosticCategory.Warning,
-                        code: 778,
+                        code: 706,
                         source: 'EndpointAnalyser'
                     })
                 }
@@ -123,7 +123,7 @@ export class MainEndpointAnalyser {
                     length: (endpoint.methodObject.name.getEnd() - endpoint.methodObject.name.getStart()) ? (endpoint.methodObject.name.getEnd() - endpoint.methodObject.name.getStart()) : 10,
                     messageText: `Endpoint not used in frontend!`,
                     category: ts.DiagnosticCategory.Warning,
-                    code: 778,
+                    code: 707,
                     source: 'EndpointAnalyser'
                 })
             }

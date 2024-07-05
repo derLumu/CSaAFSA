@@ -34,7 +34,7 @@ export class ExceptionEndpointAnalyser extends EndpointAnalyser{
                     length: (exception.throwNode.getEnd() - exception.throwNode.getStart())? (exception.throwNode.getEnd() - exception.throwNode.getStart()) : 10,
                     messageText: `Exception "${exception.name}" is not documented in endpoint "${endpoint.name}"! Found in:\n- ${endpoint.methodObject.getSourceFile().fileName}`,
                     category: ts.DiagnosticCategory.Warning,
-                    code: 779,
+                    code: 703,
                     source: 'EndpointAnalyser'
                 })
                 this.diagnostics.push({
@@ -43,7 +43,7 @@ export class ExceptionEndpointAnalyser extends EndpointAnalyser{
                     length: (endpoint.methodObject.name.getEnd() - endpoint.methodObject.name.getStart())? (endpoint.methodObject.name.getEnd() - endpoint.methodObject.name.getStart()) : 10,
                     messageText: `Exception "${exception.name}" is not documented in this endpoint! Found in:\n- ${exception.throwNode.getSourceFile().fileName}`,
                     category: ts.DiagnosticCategory.Warning,
-                    code: 779,
+                    code: 703,
                     source: 'EndpointAnalyser',
                 })
             } else {
@@ -56,8 +56,8 @@ export class ExceptionEndpointAnalyser extends EndpointAnalyser{
                 start: endpoint.methodObject.name.getStart(),
                 length: (endpoint.methodObject.name.getEnd() - endpoint.methodObject.name.getStart())? (endpoint.methodObject.name.getEnd() - endpoint.methodObject.name.getStart()) : 10,
                 messageText: `Exception(s) "${handled.join(", ")}" is / are documented but not  thrown in this endpoint!`,
-                category: ts.DiagnosticCategory.Suggestion,
-                code: 779,
+                category: ts.DiagnosticCategory.Warning,
+                code: 704,
                 source: 'EndpointAnalyser',
             })
         }
