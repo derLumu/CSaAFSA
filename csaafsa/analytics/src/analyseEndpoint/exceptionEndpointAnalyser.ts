@@ -23,16 +23,16 @@ export class ExceptionEndpointAnalyser extends EndpointAnalyser{
         this.recursiveMethodOrConstructor(endpoint.methodObject)
         let unhandledCounter = 0;
         const unhandled = []
+        let handled = endpoint.handledExceptions.slice()
         this.seenExceptions.forEach((exception) => {
             if (!endpoint.handledExceptions.find(e => exception.name.includes(e))) {
                 unhandledCounter++;
                 unhandled.push(exception)
-                //TODO: remind the throw object or file path of it to display it here
                 this.diagnostics.push({
                     file: exception.throwNode.getSourceFile(),
                     start: exception.throwNode.getStart(),
                     length: (exception.throwNode.getEnd() - exception.throwNode.getStart())? (exception.throwNode.getEnd() - exception.throwNode.getStart()) : 10,
-                    messageText: `Exception "${exception.name}" is not documented in endpoint "${endpoint.name}"!`,
+                    messageText: `Exception "${exception.name}" is not documented in endpoint "${endpoint.name}"! Found in:\n- ${endpoint.methodObject.getSourceFile().fileName}`,
                     category: ts.DiagnosticCategory.Warning,
                     code: 779,
                     source: 'EndpointAnalyser'
@@ -41,17 +41,31 @@ export class ExceptionEndpointAnalyser extends EndpointAnalyser{
                     file: endpoint.methodObject.getSourceFile(),
                     start: endpoint.methodObject.name.getStart(),
                     length: (endpoint.methodObject.name.getEnd() - endpoint.methodObject.name.getStart())? (endpoint.methodObject.name.getEnd() - endpoint.methodObject.name.getStart()) : 10,
-                    messageText: `Exception "${exception.name}" is not documented in this endpoint!`,
+                    messageText: `Exception "${exception.name}" is not documented in this endpoint! Found in:\n- ${exception.throwNode.getSourceFile().fileName}`,
                     category: ts.DiagnosticCategory.Warning,
                     code: 779,
                     source: 'EndpointAnalyser',
                 })
+            } else {
+                handled = handled.filter(e => !exception.name.includes(e))
             }
         })
+        if (handled.length > 0) {
+            this.diagnostics.push({
+                file: endpoint.methodObject.getSourceFile(),
+                start: endpoint.methodObject.name.getStart(),
+                length: (endpoint.methodObject.name.getEnd() - endpoint.methodObject.name.getStart())? (endpoint.methodObject.name.getEnd() - endpoint.methodObject.name.getStart()) : 10,
+                messageText: `Exception(s) "${handled.join(", ")}" is / are documented but not  thrown in this endpoint!`,
+                category: ts.DiagnosticCategory.Suggestion,
+                code: 779,
+                source: 'EndpointAnalyser',
+            })
+        }
         return {
             exceptionsThrown: Array.from(this.seenExceptions),
             exceptionsUnhandled: unhandled,
             exceptionsUnhandledCount: unhandledCounter,
+            exceptionsHandledNotThrown: handled,
             diagnostics: this.diagnostics
         }
     }

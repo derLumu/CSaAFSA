@@ -8,6 +8,7 @@ export class ExceptionAnalysis {
     exceptionsThrown: FoundException[] = [];
     exceptionsUnhandled: FoundException[] = [];
     exceptionsUnhandledCount: number = 0;
+    exceptionsHandledNotThrown: string[] = [];
     diagnostics: ts.Diagnostic[] = []
 }
 
@@ -17,7 +18,7 @@ export class MainEndpointAnalyser {
     sumOfEndpointsUniqueName: number = 0;
     sumOfEndpointsUniqueUrl: number = 0;
     sumOfUnusedEndpoints: number = 0;
-    exceptionAnalysis: ExceptionAnalysis = { exceptionsThrown: [], exceptionsUnhandledCount: 0, exceptionsUnhandled: [], diagnostics: []}
+    exceptionAnalysis: ExceptionAnalysis = { exceptionsThrown: [], exceptionsUnhandledCount: 0, exceptionsUnhandled: [], exceptionsHandledNotThrown: [], diagnostics: []}
 
     diagnostics: ts.Diagnostic[] = []
 
@@ -80,6 +81,7 @@ export class MainEndpointAnalyser {
             exceptionsThrown: exceptionAnalysis.map((a) => a.exceptionsThrown).reduce((sum, current) => sum.concat(current), []),
             exceptionsUnhandled: exceptionAnalysis.map((a) => a.exceptionsUnhandled).reduce((sum, current) => sum.concat(current), []),
             exceptionsUnhandledCount: exceptionAnalysis.map((a) => a.exceptionsUnhandledCount).reduce((sum, current) => sum + current, 0),
+            exceptionsHandledNotThrown: exceptionAnalysis.map((a) => a.exceptionsHandledNotThrown).reduce((sum, current) => sum.concat(current), []),
             diagnostics: exceptionAnalysis.map((a) => a.diagnostics).reduce((sum, current) => sum.concat(current), [])
         }
     }
