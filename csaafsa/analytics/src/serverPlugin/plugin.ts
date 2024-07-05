@@ -30,11 +30,14 @@ function init(modules: { typescript: typeof import("typescript/lib/tsserverlibra
             return [...prior, getApplicableRefactors(sourceFile, positionOrRange)];
         }
         proxy.getEditsForRefactor = (fileName, formatOptions, positionOrRange, refactorName, actionName, preferences) => {
-            return refactorName == UPDATE_DTO_REFACTOR_NAME
-                ? getEditsForDTORefactor(positionOrRange, info.languageService.getProgram()?.getSourceFile(fileName)!, fileName)
-                : refactorName == EXCEPTIONS_REFACTOR_NAME?
-                    getEditsForExceptionRefactor(positionOrRange, info.languageService.getProgram()?.getSourceFile(fileName)!, fileName)
-                    : info.languageService.getEditsForRefactor(fileName, formatOptions, positionOrRange, refactorName, actionName, preferences);
+            switch (refactorName) {
+                case UPDATE_DTO_REFACTOR_NAME:
+                    return getEditsForDTORefactor(positionOrRange, info.languageService.getProgram()?.getSourceFile(fileName)!, fileName)
+                case EXCEPTIONS_REFACTOR_NAME:
+                    return getEditsForExceptionRefactor(positionOrRange, info.languageService.getProgram()?.getSourceFile(fileName)!, fileName)
+                default:
+                    return info.languageService.getEditsForRefactor(fileName, formatOptions, positionOrRange, refactorName, actionName, preferences);
+            }
         }
         return proxy;
     }
