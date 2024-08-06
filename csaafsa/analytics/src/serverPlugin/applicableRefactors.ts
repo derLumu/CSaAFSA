@@ -11,10 +11,10 @@ export const UPDATE_DTO_REFACTOR_DESCRIPTION = "Generate Update DTO";
 export const UPDATE_DTO_REFACTOR_KIND = "analytics.generateUpdateDTO";
 export const UPDATE_DTO_REFACTOR_REASON = "No class found at the current position";
 
-export function getApplicableRefactors (sourceFile: ts.SourceFile, positionOrRange: ts.TextRange | number): ts.ApplicableRefactorInfo {
+export function getApplicableRefactors (sourceFile: ts.SourceFile, positionOrRange: ts.TextRange | number, inputConfig: string): ts.ApplicableRefactorInfo {
     const actions: ts.RefactorActionInfo[] = [];
     // exception updates
-    const unhandledExceptions = ExceptionRefactorCollector.collectUnhandled(sourceFile, positionOrRange);
+    const unhandledExceptions = ExceptionRefactorCollector.collectUnhandled(sourceFile, positionOrRange, inputConfig);
     if (unhandledExceptions.exception.length > 0) {
         actions.push({
             name: EXCEPTIONS_REFACTOR_NAME,

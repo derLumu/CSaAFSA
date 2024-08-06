@@ -8,12 +8,11 @@ import { consola } from "consola";
 import {ApiCallExtractor} from "./extraction/apiCallExtractor";
 import fs from "fs";
 import {ApiCall} from "./extraction/model/endpoint";
-import {CONFIG_FILE_NAME} from "./analyseEndpoint/exceptionEndpointAnalyser";
 
-export function analyseStatic(inputBE: string): void {
+export function analyseStatic(inputBE: string, inputConfig: string): void {
     consola.start("Starting analysis")
 
-    const apiCalls = getApiCalls("./src/" + CONFIG_FILE_NAME, true)
+    const apiCalls = getApiCalls(inputConfig, true)
     let backendFiles = walkSync(inputBE)
     backendFiles = backendFiles.map((f) => f.replace(/\\/g, "/"))
     const program = ts.createProgram(backendFiles, {});
@@ -36,7 +35,7 @@ export function analyseStatic(inputBE: string): void {
 
     // handle endpoints
     const endpoints = EndpointExtractor.extractEndpoints(program, backendFiles)
-    mainEndpointAnalyser.analyseEndpoints(endpoints, checker, apiCalls)
+    mainEndpointAnalyser.analyseEndpoints(endpoints, checker, apiCalls, inputConfig)
     mainEndpointAnalyser.outputResults()
 
     consola.success("Endpoint analysis done. We are done!");
@@ -58,7 +57,7 @@ export function analyseDynamic(configPath: string, projectFiles: string[] = []):
 
     // handle endpoints
     const endpoints = EndpointExtractor.extractEndpoints(program, projectFiles)
-    diagnostics = diagnostics.concat(...mainEndpointAnalyser.analyseEndpoints(endpoints, checker, apiCalls))
+    diagnostics = diagnostics.concat(...mainEndpointAnalyser.analyseEndpoints(endpoints, checker, apiCalls, configPath))
 
     return diagnostics
 }

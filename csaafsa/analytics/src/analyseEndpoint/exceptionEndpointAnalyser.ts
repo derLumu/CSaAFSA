@@ -5,7 +5,6 @@ import fs from "fs";
 import {EndpointAnalyser} from "./endpointAnalyser";
 
 export type MethodOrConstructor = ts.MethodDeclaration | ts.ConstructorDeclaration
-export const CONFIG_FILE_NAME = "analytics.config.json"
 
 export class ExceptionEndpointAnalyser extends EndpointAnalyser{
 
@@ -18,8 +17,8 @@ export class ExceptionEndpointAnalyser extends EndpointAnalyser{
         this.checker = checker;
     }
 
-    analyseEndpoint(endpoint: Endpoint): ExceptionAnalysis {
-        this.loadMappedExceptions()
+    analyseEndpoint(endpoint: Endpoint, inputConfig: string): ExceptionAnalysis {
+        this.loadMappedExceptions(inputConfig)
         this.recursiveMethodOrConstructor(endpoint.methodObject)
         let unhandledCounter = 0;
         const unhandled = []
@@ -124,9 +123,9 @@ export class ExceptionEndpointAnalyser extends EndpointAnalyser{
         node.forEachChild((child) => this.recursiveNode(child))
     }
 
-    private loadMappedExceptions() {
-        if (!fs.existsSync("./analytics/src/" + CONFIG_FILE_NAME)) { return }
-        const configFile = fs.readFileSync("./analytics/src/" + CONFIG_FILE_NAME, 'utf-8');
+    private loadMappedExceptions(inputConfig: string) {
+        if (!fs.existsSync(inputConfig)) { return }
+        const configFile = fs.readFileSync(inputConfig, 'utf-8');
         const config = JSON.parse(configFile)
         if (!config.mappedExceptions) { return }
         config.mappedExceptions.forEach((exception: { "stringMatch": string, "ExceptionToHandle": string }) => {

@@ -17,7 +17,7 @@ export class EndpointWithPosition {
 
 export class ExceptionRefactorCollector {
 
-    public static collectUnhandled(sourcefile: ts.SourceFile, positionOrRange: ts.TextRange | number): ExceptionWithPosition {
+    public static collectUnhandled(sourcefile: ts.SourceFile, positionOrRange: ts.TextRange | number, inputConfig: string): ExceptionWithPosition {
         const position = typeof positionOrRange === "number" ? positionOrRange : positionOrRange.pos;
         const parentClass = DatatypeExtractor.getParentClassFromPosition(position, sourcefile)
         if (!parentClass || parentClass.kind != ts.SyntaxKind.ClassDeclaration) { return {exception: [], method: undefined} }
@@ -28,7 +28,7 @@ export class ExceptionRefactorCollector {
         const program = ts.createProgram([sourcefile.fileName], {});
         const checker = program.getTypeChecker();
         const analysedEndpoint = new HandledExceptionEndpointAnalyser(checker).analyseEndpoint(endpoint.endpoint)
-        return { exception: new ExceptionEndpointAnalyser(checker).analyseEndpoint(analysedEndpoint).exceptionsUnhandled, method: endpoint.method}
+        return { exception: new ExceptionEndpointAnalyser(checker).analyseEndpoint(analysedEndpoint, inputConfig).exceptionsUnhandled, method: endpoint.method}
     }
 
 }

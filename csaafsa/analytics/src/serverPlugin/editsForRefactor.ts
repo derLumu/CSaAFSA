@@ -22,10 +22,10 @@ export function getEditsForDTORefactor(positionOrRange: ts.TextRange | number, s
 
 }
 
-export function getEditsForExceptionRefactor(positionOrRange: ts.TextRange | number, sourceFile: ts.SourceFile, fileName: string): ts.RefactorEditInfo {
+export function getEditsForExceptionRefactor(positionOrRange: ts.TextRange | number, sourceFile: ts.SourceFile, fileName: string, inputConfig: string): ts.RefactorEditInfo {
     const newEdits = []
     // exception updates
-    const unhandledExceptionsWithPosition = ExceptionRefactorCollector.collectUnhandled(sourceFile, positionOrRange);
+    const unhandledExceptionsWithPosition = ExceptionRefactorCollector.collectUnhandled(sourceFile, positionOrRange, inputConfig);
     if (unhandledExceptionsWithPosition.exception.length > 0) {
         const indentation = sourceFile.getLineAndCharacterOfPosition(unhandledExceptionsWithPosition.method.getStart()).character
         let text = ""

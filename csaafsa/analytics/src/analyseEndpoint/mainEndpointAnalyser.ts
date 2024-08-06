@@ -22,14 +22,14 @@ export class MainEndpointAnalyser {
 
     diagnostics: ts.Diagnostic[] = []
 
-    public analyseEndpoints(endpoints: Endpoint[], checker: ts.TypeChecker, apiCalls: ApiCall[]): ts.Diagnostic[] {
+    public analyseEndpoints(endpoints: Endpoint[], checker: ts.TypeChecker, apiCalls: ApiCall[], inputConfig: string): ts.Diagnostic[] {
         // start analysis
         this.sumOfEndpoints = endpoints.length
         this.checkEndpointsUniqueNameAndUrl(endpoints)
         this.sumOfEndpointsUniqueName = this.getSumOfEndpointsUniqueName(endpoints)
         this.sumOfEndpointsUniqueUrl = this.getSumOfEndpointsUniqueUrl(endpoints)
         endpoints = this.extractNestedHandledExceptions(endpoints, checker)
-        this.exceptionAnalysis = this.analyseExceptionHandling(endpoints, checker)
+        this.exceptionAnalysis = this.analyseExceptionHandling(endpoints, checker, inputConfig)
         // only analyse FE if there are calls to analyse
         apiCalls.length > 0 && (this.sumOfUnusedEndpoints = this.getSumOfUnusedEndpoints(endpoints, apiCalls))
         return [...this.diagnostics, ...this.exceptionAnalysis.diagnostics]
@@ -75,8 +75,8 @@ export class MainEndpointAnalyser {
         return new Set(endpoints.map((endpoint) => endpoint.type + "," + endpoint.url)).size;
     }
 
-    private analyseExceptionHandling(endpoints: Endpoint[], checker: ts.TypeChecker): ExceptionAnalysis {
-        const exceptionAnalysis = endpoints.map((endpoint) => new ExceptionEndpointAnalyser(checker).analyseEndpoint(endpoint))
+    private analyseExceptionHandling(endpoints: Endpoint[], checker: ts.TypeChecker, inputConfig: string): ExceptionAnalysis {
+        const exceptionAnalysis = endpoints.map((endpoint) => new ExceptionEndpointAnalyser(checker).analyseEndpoint(endpoint, inputConfig))
         return {
             exceptionsThrown: exceptionAnalysis.map((a) => a.exceptionsThrown).reduce((sum, current) => sum.concat(current), []),
             exceptionsUnhandled: exceptionAnalysis.map((a) => a.exceptionsUnhandled).reduce((sum, current) => sum.concat(current), []),
