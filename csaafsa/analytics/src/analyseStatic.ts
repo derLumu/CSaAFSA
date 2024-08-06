@@ -3,7 +3,7 @@ import {MainDatatypeAnalyser} from "./analyseDatatype/mainDatatypeAnalyser";
 import {MainEndpointAnalyser} from "./analyseEndpoint/mainEndpointAnalyser";
 import {DatatypeExtractor} from "./extraction/datatypeExtractor";
 import {EndpointExtractor} from "./extraction/endpointExtractor";
-import ts from "typescript/lib/tsserverlibrary";
+import ts from "typescript";
 import { consola } from "consola";
 import {ApiCallExtractor} from "./extraction/apiCallExtractor";
 import fs from "fs";

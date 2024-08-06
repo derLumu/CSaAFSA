@@ -15,6 +15,7 @@ export function getApplicableRefactors (sourceFile: ts.SourceFile, positionOrRan
     const actions: ts.RefactorActionInfo[] = [];
     // exception updates
     const unhandledExceptions = ExceptionRefactorCollector.collectUnhandled(sourceFile, positionOrRange, inputConfig);
+
     if (unhandledExceptions.exception.length > 0) {
         actions.push({
             name: EXCEPTIONS_REFACTOR_NAME,

@@ -51,6 +51,21 @@ export class DatatypeExtractor extends Extractor {
     }
 
     public static getParentClassFromPosition(position: number, file: ts.SourceFile): ts.ClassDeclaration | ts.InterfaceDeclaration | undefined {
+        file = ts.createProgram([file.fileName], {}).getSourceFile(file.fileName);
+        let foundClass: ts.ClassDeclaration | ts.InterfaceDeclaration = undefined
+        file.forEachChild((node) => {
+            if (node.kind === ts.SyntaxKind.ClassDeclaration || node.kind === ts.SyntaxKind.InterfaceDeclaration) {
+                const classDeclaration = node as ts.ClassDeclaration | ts.InterfaceDeclaration;
+                if (classDeclaration.pos <= position && classDeclaration.end >= position) {
+                    foundClass = classDeclaration;
+                }
+            }
+        })
+        return foundClass;
+    }
+
+    public static getParentClassFromPositionOldSourceFile(position: number, file: ts.SourceFile): ts.ClassDeclaration | ts.InterfaceDeclaration | undefined {
+        file = ts.createProgram([file.fileName], {}).getSourceFile(file.fileName);
         let foundClass: ts.ClassDeclaration | ts.InterfaceDeclaration = undefined
         file.forEachChild((node) => {
             if (node.kind === ts.SyntaxKind.ClassDeclaration || node.kind === ts.SyntaxKind.InterfaceDeclaration) {

@@ -1,13 +1,13 @@
 {
   "name": "@derlumu/nest-lieh",
-  "version": "1.0.1",
+  "version": "1.0.22",
   "main": "src/index.js",
   "bin": "src/commandLine.js",
   "scripts": {
     "build": "tsc -p ."
   },
   "dependencies": {
-    "typescript": "^4.5.4",
+    "typescript": "4.9.5",
     "consola": "3.2.3"
   }
 }

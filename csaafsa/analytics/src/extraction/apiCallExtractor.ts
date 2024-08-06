@@ -1,5 +1,5 @@
 import {Extractor} from "./extractor";
-import ts from "typescript/lib/tsserverlibrary";
+import ts from "typescript";
 import {ApiCall} from "./model/endpoint";
 
 export class ApiCallExtractor  extends Extractor{

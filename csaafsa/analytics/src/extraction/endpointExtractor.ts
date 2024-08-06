@@ -8,10 +8,10 @@ export class EndpointExtractor extends Extractor {
     static extractEndpoints(program: ts.Program, projectFiles: string[]) {
         const sourceFiles = this.fileNamesToSourceFiles(program, projectFiles);
         const classDeclarations = sourceFiles.flatMap((sourceFile) => this.classDeclarationsFromSourceFile(sourceFile)).filter((type) => type !== undefined) as ts.ClassDeclaration[];
-        return classDeclarations.flatMap((declaration) => this.extractEndpointFromClass(declaration)).filter((type) => type !== undefined);
+        return classDeclarations.flatMap((declaration) => this.extractEndpointFromClass(declaration, declaration.getSourceFile())).filter((type) => type !== undefined);
     }
 
-    private static extractEndpointFromClass(classDeclaration: ts.ClassDeclaration): Endpoint[] | undefined {
+    private static extractEndpointFromClass(classDeclaration: ts.ClassDeclaration, sourceFile: ts.SourceFile): Endpoint[] | undefined {
         // look if there is a decorator with the name "Controller", otherwise the class is not a controller and undefined is returned
         const identifier = this.extractIdentifier(classDeclaration)
         if (!identifier.map((id) => id.getText()).find((s) => s === "Controller")) { return undefined; }
@@ -23,26 +23,27 @@ export class EndpointExtractor extends Extractor {
 
         // extract methods from the controller
         const methods: ts.MethodDeclaration[] = classDeclaration.members.filter((member) => member.kind === ts.SyntaxKind.MethodDeclaration) as ts.MethodDeclaration[];
-        return methods.map((method) => this.extractEndpointFromMethod(method, urlPrefix)).filter((type) => type !== undefined);
+        return methods.map((method) => this.extractEndpointFromMethod(method, urlPrefix, sourceFile)).filter((type) => type !== undefined);
     }
 
-    private static extractEndpointFromMethod(methodDeclaration: ts.MethodDeclaration, urlPrefix: string): Endpoint | undefined {
+    private static extractEndpointFromMethod(methodDeclaration: ts.MethodDeclaration, urlPrefix: string, sourceFile: ts.SourceFile): Endpoint | undefined {
         // get the type of the method
         const identifier = this.extractIdentifier(methodDeclaration)
-        const type = identifier.map((id) => id.getText().split('.').pop()).find((s) => HTTP_METHODS.includes(s.toString()))
+        const type = identifier.map((id) => id.getText(sourceFile).split('.').pop()).find((s) => HTTP_METHODS.includes(s.toString()))
         if (!type) { return undefined; }
         // safe all other decorators
         const decorators = methodDeclaration.modifiers.filter((mod) => mod.kind === ts.SyntaxKind.Decorator) as ts.Decorator[];
-        const handledExceptions = decorators.map(d => d.getText()).filter((s) => !HTTP_METHODS.includes(s) && s.startsWith("@TypedException<")).map((s) => s.split('<')?.pop()?.split('>')?.shift())
-        const path = (identifier.find((s) => HTTP_METHODS.includes(s.getText().split('.').pop())).parent as ts.CallExpression).arguments[0]?.getText()
+        const handledExceptions = decorators.map(d => d.getText(sourceFile)).filter((s) => !HTTP_METHODS.includes(s) && s.startsWith("@TypedException<")).map((s) => s.split('<')?.pop()?.split('>')?.shift())
+        //const path = (identifier.find((s) => HTTP_METHODS.includes(s.getText(sourceFile).split('.').pop())).parent as ts.CallExpression).arguments[0]?.getText(sourceFile)
+        const path = methodDeclaration.modifiers.find(m => HTTP_METHODS.includes(m.getText(sourceFile).split('.').pop().split('(').shift())).getText(sourceFile).split('(').pop().split(')').shift().slice(1, -1)
 
         return {
-            name: methodDeclaration.name.getText(),
+            name: methodDeclaration.name.getText(sourceFile),
             type: type as "Get" | "Post" | "Patch" | "Delete",
             url: urlPrefix.replace(/'/g, "") + "/" + (path? path: ""),
             handledExceptions: handledExceptions,
             methodObject: methodDeclaration,
-            filePath: methodDeclaration.getSourceFile().fileName
+            filePath: sourceFile.fileName
         }
     }
 
@@ -52,7 +53,7 @@ export class EndpointExtractor extends Extractor {
        return callExpressions.filter((exp) => exp.expression.kind === ts.SyntaxKind.Identifier || exp.expression.kind === ts.SyntaxKind.PropertyAccessExpression).map((exp) => exp.expression) as (ts.Identifier | ts.PropertyAccessExpression)[];
     }
 
-    public static getParentEndpoint(parentClass: ts.ClassDeclaration, position: number): EndpointWithPosition | undefined {
+    public static getParentEndpoint(parentClass: ts.ClassDeclaration, position: number, sourceFile: ts.SourceFile): EndpointWithPosition | undefined {
         let foundMethod: ts.MethodDeclaration = undefined
         parentClass.forEachChild((node) => {
             if (node.kind === ts.SyntaxKind.MethodDeclaration) {
@@ -62,7 +63,7 @@ export class EndpointExtractor extends Extractor {
                 }
             }
         })
-        return { endpoint: this.extractEndpointFromMethod(foundMethod, ""), method: foundMethod };
+        return { endpoint: this.extractEndpointFromMethod(foundMethod, "", sourceFile), method: foundMethod };
     }
 
 }
