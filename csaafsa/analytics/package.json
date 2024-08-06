@@ -1,12 +1,13 @@
 {
-  "name": "analytics",
-  "version": "1.0.0",
+  "name": "@derlumu/nest-lieh",
+  "version": "1.0.1",
   "main": "src/index.js",
+  "bin": "src/commandLine.js",
   "scripts": {
-    "build": "tsc -p .",
-    "start": "node ../dist/analytics/src/commandLine.js D:/Java/werwolf-bot/analytics-test/org/my-nest-app/src"
+    "build": "tsc -p ."
   },
   "dependencies": {
-    "typescript": "^4.5.4"
+    "typescript": "^4.5.4",
+    "consola": "3.2.3"
   }
 }
