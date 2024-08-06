@@ -27,19 +27,20 @@ export function getEditsForExceptionRefactor(positionOrRange: ts.TextRange | num
     // exception updates
     const unhandledExceptionsWithPosition = ExceptionRefactorCollector.collectUnhandled(sourceFile, positionOrRange, inputConfig);
     if (unhandledExceptionsWithPosition.exception.length > 0) {
-        const indentation = sourceFile.getLineAndCharacterOfPosition(unhandledExceptionsWithPosition.method.getStart()).character
+        //const indentation = sourceFile.getLineAndCharacterOfPosition(unhandledExceptionsWithPosition.method.getStart()).character
+        const indentation = 2
         let text = ""
         unhandledExceptionsWithPosition.exception.forEach((exception) => {
             const whitespaces = " ".repeat(indentation)
             const croppedName = exception.name.split('Exception').shift().toUpperCase()
-            text += `@TypedException<${exception.name}>(HttpStatus.${croppedName}, "A ${exception.name} accured")\n${whitespaces}`
+            !text.includes(croppedName) && (text += `\n${whitespaces}@TypedException<${exception.name}>(HttpStatus.${croppedName}, "A ${exception.name} accured")`)
         })
         newEdits.push({
             fileName: fileName,
             textChanges: [{
                 newText: text,
                 span: {
-                    start: unhandledExceptionsWithPosition.method.name.getStart(),
+                    start: unhandledExceptionsWithPosition.method.name.pos,
                     length: 0,
                 }
             }]

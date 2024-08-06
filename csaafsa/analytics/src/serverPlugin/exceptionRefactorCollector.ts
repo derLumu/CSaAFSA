@@ -4,6 +4,7 @@ import {EndpointExtractor} from "../extraction/endpointExtractor";
 import ts from "typescript";
 import {HandledExceptionEndpointAnalyser} from "../analyseEndpoint/handledExectionEndpointAnalyser";
 import {ExceptionEndpointAnalyser} from "../analyseEndpoint/exceptionEndpointAnalyser";
+import {analyseDynamic} from "../analyseStatic";
 
 export class ExceptionWithPosition {
     exception: FoundException[];
@@ -27,12 +28,23 @@ export class ExceptionRefactorCollector {
         const endpoint = EndpointExtractor.getParentEndpoint(parentClass, position, newSourceFile)
         if (!endpoint.endpoint) { return {exception: [], method: undefined} }
 
-        const compilerHost = ts.createCompilerHost({}, /* setParentNodes */ true);
+        const dia = analyseDynamic(inputConfig, [newSourceFile.fileName])
+        const filtered: FoundException[] = []
+        dia.filter((d) => d.code === 703).forEach((d) => {
+            filtered.push({name: d.messageText.toString().split('"')[1].split('"').shift(), throwNode: undefined})
+        })
+        return { exception: filtered, method: endpoint.method }
 
+        /*
+-
         const program = ts.createProgram([newSourceFile.fileName], {}, compilerHost);
         const checker = program.getTypeChecker();
         const analysedEndpoint = new HandledExceptionEndpointAnalyser(checker).analyseEndpoint(endpoint.endpoint)
-        return { exception: new ExceptionEndpointAnalyser(checker).analyseEndpoint(analysedEndpoint, inputConfig).exceptionsUnhandled, method: endpoint.method}
+        return { exception: new ExceptionEndpointAnalyser(checker).analyseEndpoint(analysedEndpoint, inputConfig).exceptionsUnhandled, method: endpoint.method} */
+
+
+
+
     }
 
 }

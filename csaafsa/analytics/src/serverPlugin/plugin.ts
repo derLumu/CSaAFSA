@@ -26,7 +26,8 @@ function init(modules: { typescript: typeof import("typescript/lib/tsserverlibra
         }
         proxy.getApplicableRefactors = (fileName, positionOrRange, preferences) => {
             const prior = info.languageService.getApplicableRefactors(fileName, positionOrRange, preferences);
-            const sourceFile = info.languageService.getProgram()?.getSourceFile(fileName);
+            const program = ts.createProgram(info.languageService.getProgram().getRootFileNames() as string[], {});
+            const sourceFile = program.getSourceFile(fileName);
             return [...prior, getApplicableRefactors(sourceFile, positionOrRange, configPath)];
         }
         proxy.getEditsForRefactor = (fileName, formatOptions, positionOrRange, refactorName, actionName, preferences) => {

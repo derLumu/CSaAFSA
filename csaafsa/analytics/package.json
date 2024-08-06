@@ -1,6 +1,6 @@
 {
   "name": "@derlumu/nest-lieh",
-  "version": "1.0.22",
+  "version": "1.0.26",
   "main": "src/index.js",
   "bin": "src/commandLine.js",
   "scripts": {
