@@ -4,7 +4,9 @@
   "main": "src/index.js",
   "bin": "src/commandLine.js",
   "scripts": {
-    "build": "tsc -p ."
+    "build": "tsc -p .",
+    "start": "node ../dist/analytics/src/commandLine.js D:/Java/werwolf-bot/analytics-test/org/my-nest-app/src D:/Java/CSaAFSA/csaafsa/analytics/src/analytics.config.json",
+    "startDM": "node ../dist/analytics/src/commandLine.js D:/Java/werwolf-bot/digital-control-center/backend/src D:/Java/CSaAFSA/csaafsa/analytics/src/analytics.config.json"
   },
   "dependencies": {
     "typescript": "4.9.5",

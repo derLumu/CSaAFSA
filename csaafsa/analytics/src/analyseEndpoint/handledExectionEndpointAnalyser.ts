@@ -14,7 +14,7 @@ export class HandledExceptionEndpointAnalyser extends EndpointAnalyser {
 
     analyseEndpoint(endpoint: Endpoint): Endpoint {
         const decorators = endpoint.methodObject.modifiers.filter((mod) => mod.kind === ts.SyntaxKind.Decorator) as ts.Decorator[];
-        const decoratorCalls = decorators.map(d => this.checker.getSymbolAtLocation(((d.expression as CallExpression).expression)).declarations[0] as MethodDeclaration).filter((dec) => dec !== undefined) as MethodDeclaration[];
+        const decoratorCalls = decorators.map(d => this.checker.getSymbolAtLocation(((d.expression as CallExpression).expression))?.declarations[0] as MethodDeclaration).filter((dec) => dec !== undefined) as MethodDeclaration[];
         decoratorCalls.forEach((dec) => this.recursiveMethodOrConstructor(dec))
         endpoint.handledExceptions = endpoint.handledExceptions.concat(Array.from(this.seenExceptionsString))
         return endpoint
@@ -24,6 +24,9 @@ export class HandledExceptionEndpointAnalyser extends EndpointAnalyser {
         if (node.kind == ts.SyntaxKind.CallExpression) {
             if (!HTTP_METHODS.includes(node.getText()) && node.getText().startsWith("TypedException<")) {
                 this.seenExceptionsString.add(node.getText().split('<')?.pop()?.split('>')?.shift())
+            }
+            else if (!HTTP_METHODS.includes(node.getText()) && node.getText().endsWith("Response") && node.getText().startsWith("Api")) {
+                this.seenExceptionsString.add(node.getText().substring(3, node.getText().length - 8))
             }
         }
 

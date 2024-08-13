@@ -105,6 +105,7 @@ export class MainEndpointAnalyser {
             + ` - You have thrown this many Exceptions: ${this.exceptionAnalysis.exceptionsThrown.length}\n`
             + ` - And this is the Number of handled Exceptions: ${this.exceptionAnalysis.exceptionsThrown.length - this.exceptionAnalysis.exceptionsUnhandledCount}\n`
             + ` - That is the percentage of handled exceptions: ${((this.exceptionAnalysis.exceptionsThrown.length - this.exceptionAnalysis.exceptionsUnhandledCount) / this.exceptionAnalysis.exceptionsThrown.length * 100).toFixed(2)}%\n`
+            + ` - By the way, this many exception were handled but never thrown: ${this.exceptionAnalysis.exceptionsHandledNotThrown.length}\n`
         )
     }
 

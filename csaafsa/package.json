@@ -9,6 +9,7 @@
   },
   "private": true,
   "dependencies": {
+    "@nestjs/swagger": "^7.4.0",
     "@typescript-eslint/typescript-estree": "^7.8.0",
     "axios": "^1.6.0",
     "consola": "^3.2.3",
