@@ -3,12 +3,37 @@ import {Endpoint} from "./model/endpoint";
 import {Extractor, HTTP_METHODS} from "./extractor";
 import {EndpointWithPosition} from "../serverPlugin/exceptionRefactorCollector";
 
+export const EXCEPTIONS = [
+    "BadRequestException",
+    "Unauthorized",
+    "NotFound",
+    "Forbidden",
+    "NotAcceptable",
+    "RequestTimeout",
+    "Conflict",
+    "Gone",
+    "HttpVersionNotSupported",
+    "PayloadTooLarge",
+    "UnsupportedMediaType",
+    "UnprocessableEntity",
+    "InternalServerError",
+    "NotImplemented",
+    "ImATeapot",
+    "MethodNotAllowed",
+    "BadGateway",
+    "ServiceUnavailable",
+    "GatewayTimeout",
+    "PreconditionFailed"]
+
 export class EndpointExtractor extends Extractor {
 
     static extractEndpoints(program: ts.Program, projectFiles: string[]) {
         const sourceFiles = this.fileNamesToSourceFiles(program, projectFiles);
         const classDeclarations = sourceFiles.flatMap((sourceFile) => this.classDeclarationsFromSourceFile(sourceFile)).filter((type) => type !== undefined) as ts.ClassDeclaration[];
-        return classDeclarations.flatMap((declaration) => this.extractEndpointFromClass(declaration, declaration.getSourceFile())).filter((type) => type !== undefined);
+        const endpoints = classDeclarations.flatMap((declaration) => this.extractEndpointFromClass(declaration, declaration.getSourceFile()))
+            .filter((type) => type !== undefined)
+        endpoints.forEach((endpoint) => endpoint.handledExceptions = endpoint.handledExceptions.filter(e => EXCEPTIONS.includes(e)));
+        return endpoints as Endpoint[];
     }
 
     private static extractEndpointFromClass(classDeclaration: ts.ClassDeclaration, sourceFile: ts.SourceFile): Endpoint[] | undefined {

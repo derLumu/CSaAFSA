@@ -60,6 +60,7 @@ export class ExceptionEndpointAnalyser extends EndpointAnalyser{
                 source: 'EndpointAnalyser',
             })
         }
+        console.log(handled)
         return {
             exceptionsThrown: Array.from(this.seenExceptions),
             exceptionsUnhandled: unhandled,
