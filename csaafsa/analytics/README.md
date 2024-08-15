@@ -50,7 +50,7 @@ npx @derlumu/nest-lieh <path-to-backend> <path-to-config-file>
 ## Functionallity
 
 This sections contains a short oberview of nest-lieh`s functions.
-For an in depth view on the technical background of the functions please follow the links to the [static analyser](src/README.md) and [language server plugin](src/serverPlugin/README.md)
+For an in depth view on the technical background of the functions please follow the links to the [static analyser](src/README.md) and [language server plugin](src/serverPlugin/README.md). There you will find guidance hopefully leading you to the file(s) containin the concrete implementation you are searching for.
 
 #### Mapping method calls to exceptions
 
@@ -97,6 +97,7 @@ It also shows some percentages in this matter.
 
 If you have specified a frontend path in your config file, the usage of endpoints will be analysed.
 Endpoints not used in the frontend will be marked as redundend.
+Note that this function only properly works with angular frontends.
 
 #### Giving endpoint metrics
 
