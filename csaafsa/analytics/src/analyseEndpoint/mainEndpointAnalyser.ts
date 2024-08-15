@@ -30,6 +30,7 @@ export class MainEndpointAnalyser {
         this.sumOfEndpointsUniqueUrl = this.getSumOfEndpointsUniqueUrl(endpoints)
         endpoints = this.extractNestedHandledExceptions(endpoints, checker)
         this.exceptionAnalysis = this.analyseExceptionHandling(endpoints, checker, inputConfig)
+
         // only analyse FE if there are calls to analyse
         apiCalls.length > 0 && (this.sumOfUnusedEndpoints = this.getSumOfUnusedEndpoints(endpoints, apiCalls))
         return [...this.diagnostics, ...this.exceptionAnalysis.diagnostics]

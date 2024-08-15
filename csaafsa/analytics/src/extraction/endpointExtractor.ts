@@ -67,7 +67,7 @@ export class EndpointExtractor extends Extractor {
         return {
             name: methodDeclaration.name.getText(sourceFile),
             type: type as "Get" | "Post" | "Patch" | "Delete",
-            url: urlPrefix.replace(/'/g, "") + "/" + (path? path: ""),
+            url: urlPrefix?.replace(/'/g, "") + "/" + (path? path: ""),
             handledExceptions: Array.from(handledExceptions),
             methodObject: methodDeclaration,
             filePath: sourceFile.fileName
@@ -75,9 +75,9 @@ export class EndpointExtractor extends Extractor {
     }
 
     private static extractIdentifier(declarations: ts.ClassDeclaration | ts.MethodDeclaration): (ts.Identifier | ts.PropertyAccessExpression)[] {
-       const classDecorators = declarations.modifiers.filter((mod) => mod.kind === ts.SyntaxKind.Decorator) as ts.Decorator[];
-       const callExpressions = classDecorators.filter((dec) => dec.expression.kind === ts.SyntaxKind.CallExpression).map((dec) => dec.expression) as ts.CallExpression[];
-       return callExpressions.filter((exp) => exp.expression.kind === ts.SyntaxKind.Identifier || exp.expression.kind === ts.SyntaxKind.PropertyAccessExpression).map((exp) => exp.expression) as (ts.Identifier | ts.PropertyAccessExpression)[];
+       const classDecorators = declarations.modifiers?.filter((mod) => mod.kind === ts.SyntaxKind.Decorator) as ts.Decorator[];
+       const callExpressions = classDecorators?.filter((dec) => dec.expression.kind === ts.SyntaxKind.CallExpression).map((dec) => dec.expression) as ts.CallExpression[];
+       return callExpressions? callExpressions.filter((exp) => exp.expression.kind === ts.SyntaxKind.Identifier || exp.expression.kind === ts.SyntaxKind.PropertyAccessExpression).map((exp) => exp.expression) as (ts.Identifier | ts.PropertyAccessExpression)[]: [];
     }
 
     public static getParentEndpoint(parentClass: ts.ClassDeclaration, position: number, sourceFile: ts.SourceFile): EndpointWithPosition | undefined {

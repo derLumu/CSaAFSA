@@ -16,6 +16,9 @@ export class HandledExceptionEndpointAnalyser extends EndpointAnalyser {
         const decorators = endpoint.methodObject.modifiers.filter((mod) => mod.kind === ts.SyntaxKind.Decorator) as ts.Decorator[];
         const decoratorCalls = decorators.map(d => this.checker.getSymbolAtLocation(((d.expression as CallExpression).expression))?.declarations[0] as MethodDeclaration).filter((dec) => dec !== undefined) as MethodDeclaration[];
         decoratorCalls.forEach((dec) => this.recursiveMethodOrConstructor(dec))
+        if (decoratorCalls.find((dec) => dec.getText().includes("AssignmentAuth"))) {
+            endpoint.handledExceptions.unshift("Forbidden")
+        }
         endpoint.handledExceptions = endpoint.handledExceptions.concat(Array.from(this.seenExceptionsString))
         return endpoint
     }
