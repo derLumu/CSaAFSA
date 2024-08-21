@@ -14,5 +14,6 @@
   "dependencies": {
     "typescript": "4.9.5",
     "consola": "3.2.3"
-  }
+  },
+  "homepage": "https://github.com/derLumu/CSaAFSA/tree/main/csaafsa/analytics"
 }
