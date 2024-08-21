@@ -1,4 +1,5 @@
 {
+  "frontendPath": "D:/Java/apollusia/apps/frontend",
   "mappedExceptions": [
     {
       "stringMatch": "findAll",

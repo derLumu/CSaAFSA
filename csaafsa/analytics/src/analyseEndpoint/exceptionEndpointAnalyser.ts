@@ -54,13 +54,12 @@ export class ExceptionEndpointAnalyser extends EndpointAnalyser{
                 file: endpoint.methodObject.getSourceFile(),
                 start: endpoint.methodObject.name.getStart(),
                 length: (endpoint.methodObject.name.getEnd() - endpoint.methodObject.name.getStart())? (endpoint.methodObject.name.getEnd() - endpoint.methodObject.name.getStart()) : 10,
-                messageText: `Exception(s) "${handled.join(", ")}" is / are documented but not  thrown in this endpoint!`,
+                messageText: `Exception(s) "${handled.join(", ")}" is / are documented but not thrown in this endpoint!`,
                 category: ts.DiagnosticCategory.Warning,
                 code: 704,
                 source: 'EndpointAnalyser',
             })
         }
-        console.log(unhandled.map(e => e.name), endpoint.filePath)
         return {
             exceptionsThrown: Array.from(this.seenExceptions),
             exceptionsUnhandled: unhandled,
