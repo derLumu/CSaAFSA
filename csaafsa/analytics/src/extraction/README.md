@@ -30,5 +30,5 @@ To extract the endpoints the following steps are conducted:
 If the user enters the frontend path property to its config file the frontend files are analysed. The analyses target is to find calls to the backend to then mark unused endpoints in the backend. To extract the api calls the following steps are conducted:
 
 1. Extract all class and interface declarations, as well as type alias' from the sourcefiles by looking at the sourcefiles `member` property.
-2. Extract all methods from the found controllers by looking at the methods `member` property.
-3. Recursively traverse all method calls made by the extracted methods. While doing so document all seen api calls 
+2. Extract all methods from the found classes by looking at the methods `member` property.
+3. Recursively traverse all method calls made by the extracted methods. While doing so document all seen api calls.
