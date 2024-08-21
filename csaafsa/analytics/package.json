@@ -1,5 +1,9 @@
 {
   "name": "@derlumu/nest-lieh",
+  "description": "A little helper project to analyze NestJS Exception documentation and datatype boilerplate.",
+  "keywords": ["NestJS", "TypeScript", "Code Analysis"],
+  "license": "Apache-2.0",
+  "author": "Lukas Kawollek <kawollek@student.uni-kassel.de>",
   "version": "1.1.1",
   "main": "src/index.js",
   "bin": "src/commandLine.js",
