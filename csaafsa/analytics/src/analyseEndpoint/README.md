@@ -1,6 +1,6 @@
 # Endpoint analyser
 
-The endpoint analysis can be split into two parts, analysing th endpoint itself and analysing its exception documentation
+The endpoint analysis can be split into two parts, analysing the endpoint itself and analysing its exception documentation
 
 ## Endpoint metrics
 
